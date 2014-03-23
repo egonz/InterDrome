@@ -117,10 +117,9 @@ void on_device_info(uint8_t* address, int8_t rssi)
   // Send your request
   xbee.send(zbTx);
   
-#if defined(ID_DATA_LOGGER)  
+#if defined(ID_DATA_LOGGER)
   //Null out remaining logEvent payload before appending RSSI
-  uint8_t logEventLen = 14 + (8 * sizeof(int8_t)) + 1;
-  for (uint8_t i = 14; i < logEventLen; i++)
+  for (uint8_t i = 14; i < sizeof(logEvent); i++)
   {
     logEvent[i] = 0;
   }
@@ -128,10 +127,7 @@ void on_device_info(uint8_t* address, int8_t rssi)
   //Append char* RSSI
   strcat(&logEvent[14], c_rssi);
   
-//  Serial.println(logEvent);
-//  delay(10);
-  
-//  log_to_file(logEvent);
+  log_to_file(logEvent);
 #endif
 }
 
@@ -152,21 +148,10 @@ void on_device_discovery_complete_event(uint8_t* discoveredDeviceAddr[], uint8_t
     }
   }
   
-//  int endidx = sizeof(payload);
-//  for (int i = 0; i < endidx; i++)
-//  {
-//    Serial.print(payload[i], HEX);
-//    delay(10);
-//  }
-//  Serial.println("");
-//  delay(10);
-  
   // Create a TX Request
   ZBTxRequest zbTx = ZBTxRequest(coordAddr64, payload, sizeof(payload));
   // Send your request
   xbee.send(zbTx);
-  
-  //TODO Report Discovered Devices
 }
 
 void on_device_exit()
@@ -275,23 +260,28 @@ void log_to_file(char* dataString)
   if (!sdReady || logFile)
     return;
  
-  logFile = SD.open("DATALOG.txt", FILE_WRITE);
+  logFile = SD.open("IDLOG.txt", FILE_WRITE);
+
+  //Why isn't this file opening? It appears to be throwing an exception
 
   if (logFile) 
   {
-//    DateTime now = RTC.now();
-//  
-//    zero_pad(now.year());
-//    zero_pad(now.month());
-//    zero_pad(now.day());
-//    zero_pad(now.hour());
-//    zero_pad(now.minute());
-//    zero_pad(now.second());
-//    logFile.print(",");
-//
-//    logFile.println(dataString);
+    DateTime now = RTC.now();
+  
+    zero_pad(now.year());
+    zero_pad(now.month());
+    zero_pad(now.day());
+    zero_pad(now.hour());
+    zero_pad(now.minute());
+    zero_pad(now.second());
+    logFile.print(",");
+
+    logFile.println(dataString);
+    
     logFile.close();
-  } 
+  } else {
+//    Serial.println("Unable to open log file!");
+  }
 #endif
 }
 
