@@ -78,16 +78,16 @@ byte ble_event_process()
   case 0x0601: // GAP_DeviceDiscoveryDone
     {
       uint8_t numDevs = buf[3];
-      
+
       if (numDevs == 0 && priorDeviceCount > 0)
       {
         Serial.println(F("Sending Device Exit."));
         delay(100);
-        
+
         uint8_t payload[2];
         payload[0] = 'D';
         payload[1] = 'X';
-        
+
         // Specify the address of the remote XBee (this is the SH + SL)
         XBeeAddress64 coordAddr64 = XBeeAddress64(0x00000000, 0x00000000);
         // Create a TX Request
@@ -108,25 +108,25 @@ byte ble_event_process()
         uint8_t payload[2 + (6 * numDevs)];
         payload[0] = 'D';
         payload[1] = 'D';
-       
+
         j = 2;   
         for (int i = 0; i < numDevs; i++)
         {
           uint8_t* addr = discoveredDeviceAddr[i];
-         
+
           for (int i = 0; i < 6; i++, j++)
           {
             payload[j] = addr[i];
           }
         }
-        
+
         // Specify the address of the remote XBee (this is the SH + SL)
         XBeeAddress64 coordAddr64 = XBeeAddress64(0x00000000, 0x00000000);
         // Create a TX Request
         ZBTxRequest zbTx = ZBTxRequest(coordAddr64, payload, sizeof(payload));
         // Send your request
         xbee.send(zbTx);
-        
+
         Serial.print(F("Free Memory (Device Discovery):"));
         Serial.println(freeRam());
         delay(100);
@@ -141,44 +141,46 @@ byte ble_event_process()
     {
       int8_t rssi = buf[11];
       uint8_t slaveAddr[6];
-      
+
       memcpy(slaveAddr, &buf[5], 6);
-      
+
       char c_rssi[(8 * sizeof(int8_t)) + 1];
-  
-        uint8_t payload[11];
-        payload[0] = 'D';
-        payload[1] = 'I';
-        
+
+      uint8_t payload[11];
+      payload[0] = 'D';
+      payload[1] = 'I';
+
 #if defined(ID_DATA_LOGGER)
-        char logEvent[14 + (8 * sizeof(int8_t)) + 1];
-        logEvent[0] = 'D';
-        logEvent[1] = 'I';
+      char logEvent[14 + (8 * sizeof(int8_t)) + 1];
+      logEvent[0] = 'D';
+      logEvent[1] = 'I';
 #endif
-        
-        for (uint8_t i = 0, j = 2, k = 2; i < 6; i++, j++, k++)
-        {
-          payload[j] = slaveAddr[i];
-          
+
+      for (uint8_t i = 0, j = 2, k = 2; i < 6; i++, j++, k++)
+      {
+        payload[j] = slaveAddr[i];
+
 #if defined(ID_DATA_LOGGER)
-          char hx_first = (slaveAddr[i] >> 4);
-          if (hx_first > 0x9) hx_first += 55; else hx_first += 48;
-          char hx_second = (slaveAddr[i] & 0xf);
-          if (hx_second > 0x9) hx_second += 55; else hx_second += 48;
-          
-          logEvent[k] = hx_first;
-          logEvent[++k] = hx_second;
+        char hx_first = (slaveAddr[i] >> 4);
+        if (hx_first > 0x9) hx_first += 55; 
+        else hx_first += 48;
+        char hx_second = (slaveAddr[i] & 0xf);
+        if (hx_second > 0x9) hx_second += 55; 
+        else hx_second += 48;
+
+        logEvent[k] = hx_first;
+        logEvent[++k] = hx_second;
 #endif
-        }
-        
-        itoa(rssi, c_rssi, 10);
-        
-        for (int i = 0, j = 8; i < sizeof(c_rssi); i++, j++)
-        {
-          if (c_rssi[i] != '-')
-            payload[j] = c_rssi[i];
-        }
-      
+      }
+
+      itoa(rssi, c_rssi, 10);
+
+      for (int i = 0, j = 8; i < sizeof(c_rssi); i++, j++)
+      {
+        if (c_rssi[i] != '-')
+          payload[j] = c_rssi[i];
+      }
+
       //  //DEBUG
       //  for (int i = 0; i < sizeof(payload); i++)
       //  {
@@ -189,25 +191,25 @@ byte ble_event_process()
       //  //DEBUG
       //  Serial.println("");
       //  delay(10);
-      
-        // Specify the address of the remote XBee (this is the SH + SL)
-        XBeeAddress64 coordAddr64 = XBeeAddress64(0x00000000, 0x00000000);
-        // Create a TX Request
-        ZBTxRequest zbTx = ZBTxRequest(coordAddr64, payload, sizeof(payload));
-        // Send your request
-        xbee.send(zbTx);
-        
+
+      // Specify the address of the remote XBee (this is the SH + SL)
+      XBeeAddress64 coordAddr64 = XBeeAddress64(0x00000000, 0x00000000);
+      // Create a TX Request
+      ZBTxRequest zbTx = ZBTxRequest(coordAddr64, payload, sizeof(payload));
+      // Send your request
+      xbee.send(zbTx);
+
 #if defined(ID_DATA_LOGGER)
-        //Null out remaining logEvent payload before appending RSSI
-        for (uint8_t i = 14; i < sizeof(logEvent); i++)
-        {
-          logEvent[i] = 0;
-        }
-        
-        //Append char* RSSI
-        strcat(&logEvent[14], c_rssi);
-        
-        log_to_file(logEvent);
+      //Null out remaining logEvent payload before appending RSSI
+      for (uint8_t i = 14; i < sizeof(logEvent); i++)
+      {
+        logEvent[i] = 0;
+      }
+
+      //Append char* RSSI
+      strcat(&logEvent[14], c_rssi);
+
+      log_to_file(logEvent);
 #endif
 
       Serial.print(F("Free Memory (Device Info):"));
@@ -243,10 +245,10 @@ byte ble_event_process()
 void zero_pad(int i, ofstream* sdlog)
 {
 #if defined(ID_DATA_LOGGER) 
-//  if (i <= 9) {
-//    logFile.print(0, DEC);
-//  }
-//  logFile.print(i, DEC);
+  //  if (i <= 9) {
+  //    logFile.print(0, DEC);
+  //  }
+  //  logFile.print(i, DEC);
 #endif
 }
 
@@ -285,10 +287,10 @@ int freeRam()
 void check_memory()
 {
   int _freeRam = freeRam();
-  
-//  Serial.print(F("Free Memory (check memory):"));
-//  Serial.println(_freeRam);
-  
+
+  //  Serial.print(F("Free Memory (check memory):"));
+  //  Serial.println(_freeRam);
+
   if (_freeRam < 100) 
   {
     Serial.println(F("Free Memory < 100!"));
@@ -324,7 +326,7 @@ void setup()
 #if defined(ID_DATA_LOGGER)
   Wire.begin();
   RTC.begin();
-  
+
   if (! RTC.isrunning()) {
     // following line sets the RTC to the date & time this sketch was compiled
     // uncomment it & upload to set the time, date and start run the RTC!
@@ -342,14 +344,15 @@ void setup()
 void loop()
 { 
   check_memory();
-  
+
   delay(1000);
-  
+
   _start_discovery();
 
   while (ble_event_available())
     ble_event_process();
 }
+
 
 
 
