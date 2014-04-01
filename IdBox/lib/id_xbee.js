@@ -1,6 +1,7 @@
 var util = require('util');
 var SerialPort = require('serialport').SerialPort;
 var xbee_api = require('xbee-api');
+var WeMo = require('wemo.js');
 var mongoose = require('mongoose'),
     Beacon = mongoose.model('Beacon'),
     Bleep = mongoose.model('Bleep'),
@@ -11,6 +12,7 @@ var mongoose = require('mongoose'),
 var config = require('./config/config');
 
 var C = xbee_api.constants;
+var wemoAddr;
 
 var xbeeAPI = new xbee_api.XBeeAPI({
   api_mode: 1
@@ -20,6 +22,34 @@ var serialport = new SerialPort(config.xbee.serial.port, {
   baudrate: config.xbee.serial.baud,
   parser: xbeeAPI.rawParser()
 });
+
+function lookForWemoDevices() {
+  WeMo.discover(function(WeMos) {
+    if (WeMos.length <= 0) {
+      setTimeout(function() {lookForWemoDevices();}, 3000);
+    } else {
+      wemoAddr = WeMos[0].location.host;
+      console.log('Wemo Addr Found ' + wemoAddr);
+    }
+  });
+}
+
+lookForWemoDevices();
+
+function onDeviceInfo(beaconAddr, bleepAddr) {
+  var client = WeMo.createClient(wemoAddr);
+
+  client.state(function(err,state) {
+    if (state===0)
+      client.on();
+  });
+}
+
+function onDeviceExit(bleep) {
+  console.log('Triggering Exit event.');
+  var client = WeMo.createClient(wemoAddr);
+  client.off();
+}
 
 function saveBleepEvent(event, bleep, beaconAddr) {
   Beacon.findOne({ address: beaconAddr }, function (err, beacon) {
@@ -191,6 +221,8 @@ function saveBleep(bleepAddr, beaconAddrs) {
 }
 
 function saveBeacon(addr, addrBuf, rssi, bleepAddr) {
+  onDeviceInfo(addr, bleepAddr);
+
   Beacon.findOne({ address: addr }, function (err, beacon) {
     if (!err) {
       if (beacon) {
@@ -304,6 +336,8 @@ function processDeviceExit(bleepAddr) {
             console.log("Error updating bleep.");
           }
         });
+
+        onDeviceExit(bleep);
       } else {
         console.log('Bleep not found!');
       }
