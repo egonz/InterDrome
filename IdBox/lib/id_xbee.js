@@ -1,7 +1,7 @@
 var util = require('util');
 var SerialPort = require('serialport').SerialPort;
 var xbee_api = require('xbee-api');
-var WeMo = require('wemo.js');
+var WeMo = new require('wemo');
 var mongoose = require('mongoose'),
     Beacon = mongoose.model('Beacon'),
     Bleep = mongoose.model('Bleep'),
@@ -12,43 +12,46 @@ var mongoose = require('mongoose'),
 var config = require('./config/config');
 
 var C = xbee_api.constants;
-var wemoAddr;
+var wemoSwitch;
 
 var xbeeAPI = new xbee_api.XBeeAPI({
   api_mode: 1
 });
 
-var serialport = new SerialPort(config.xbee.serial.port, {
-  baudrate: config.xbee.serial.baud,
-  parser: xbeeAPI.rawParser()
-});
+var serialport;
 
-function lookForWemoDevices() {
-  WeMo.discover(function(WeMos) {
-    if (WeMos.length <= 0) {
-      setTimeout(function() {lookForWemoDevices();}, 3000);
-    } else {
-      wemoAddr = WeMos[0].location.host;
-      console.log('Wemo Addr Found ' + wemoAddr);
-    }
+try {
+  var serialport = new SerialPort(config.xbee.serial.port, {
+    baudrate: config.xbee.serial.baud,
+    parser: xbeeAPI.rawParser()
   });
+} catch (e) {
+  console.log('Error opening connection to XBee.');
 }
 
-lookForWemoDevices();
+var client = WeMo.Search();
+client.on('found', function(device) {
+    console.log(device);
+    wemoSwitch = new WeMo(device.ip, device.port);
+});
 
 function onDeviceInfo(beaconAddr, bleepAddr) {
-  var client = WeMo.createClient(wemoAddr);
-
-  client.state(function(err,state) {
-    if (state===0)
-      client.on();
-  });
+  if (typeof wemoSwitch !== 'undefined') {
+    wemoSwitch.setBinaryState(1, function(err, result) {
+      if (err) console.error(err);
+      console.log(result);
+    });
+  }
 }
 
 function onDeviceExit(bleep) {
   console.log('Triggering Exit event.');
-  var client = WeMo.createClient(wemoAddr);
-  client.off();
+  if (typeof wemoSwitch !== 'undefined') {
+    wemoSwitch.setBinaryState(0, function(err, result) {
+      if (err) console.error(err);
+      console.log(result);
+    });
+  } 
 }
 
 function saveBleepEvent(event, bleep, beaconAddr) {
@@ -248,10 +251,12 @@ function saveBeacon(addr, addrBuf, rssi, bleepAddr) {
         beacon.rssi = rssi;
 
         Bleep.findOne({ address: bleepAddr }, function (err, bleep) {
-          beacon.bleep = bleep._id;
-          beacon.created = Date.now();
+          if (!err && bleep) {
+            console.log('Adding reference to Bleep id ' + bleep._id);
+            beacon.bleep = bleep._id;
+          }
 
-          console.log('Adding reference to Bleep id ' + bleep._id);
+          beacon.created = Date.now();
 
           beacon.save(function (err, beacon, numberAffected) {
             if (err || numberAffected <= 0) {
