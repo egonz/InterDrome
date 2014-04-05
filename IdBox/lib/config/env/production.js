@@ -5,6 +5,12 @@ module.exports = {
   mongo: {
     uri: process.env.MONGOLAB_URI ||
          process.env.MONGOHQ_URL ||
-         'mongodb://localhost/fullstack'
+         'mongodb://localhost/InterDrome'
+  },
+  xbee: {
+  	serial: {
+  		port: "/dev/ttyUSB0",
+  		baud: 9600
+  	}
   }
 };

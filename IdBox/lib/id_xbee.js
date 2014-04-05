@@ -1,4 +1,5 @@
 var util = require('util');
+var fs = require('fs');
 var SerialPort = require('serialport').SerialPort;
 var xbee_api = require('xbee-api');
 var WeMo = new require('wemo');
@@ -11,8 +12,60 @@ var mongoose = require('mongoose'),
 // Application Config
 var config = require('./config/config');
 
+
+/************************************************************
+ * WEMO                                                     *
+ ************************************************************/
+
+//TODO move this into a different JS file
+var ON = 1, OFF = 0;
+var wemoClient, wemoSwitch;
+
+var flashLights;
+
+var wemoSearch = setInterval(function() {
+  if (typeof wemoSwitch === 'undefined') {
+    wemoClient = WeMo.Search();
+    wemoClient.on('found', function(device) {
+      console.log(device);
+      wemoSwitch = new WeMo(device.ip, device.port);
+      flashLights();
+    });
+  }
+}, 5000);
+
+function setWemoSwitchState(state, callback) {
+  if (typeof wemoSwitch !== 'undefined') {
+    wemoSwitch.setBinaryState(state, function(err, result) {
+      if (err) {
+        console.error('Error sending ' + (state===ON?'ON':'OFF') + 
+          ' signal to Wemo Switch. ' + err);
+        wemoSwitch = undefined;
+      }
+      if (typeof callback !== 'undefined')
+        callback();
+    });
+  }
+}
+
+flashLights = function() {
+  setWemoSwitchState(OFF, function() {
+    setTimeout(function() {
+      setWemoSwitchState(ON, function() {
+        setTimeout(function() {
+          setWemoSwitchState(OFF);
+        }, 2000);
+      });
+    }, 2000);
+  });
+}
+
+
+/************************************************************
+ * ZigBee / XBee Inter.'.Drome                              *
+ ************************************************************/
+
 var C = xbee_api.constants;
-var wemoSwitch;
 
 var xbeeAPI = new xbee_api.XBeeAPI({
   api_mode: 1
@@ -20,38 +73,22 @@ var xbeeAPI = new xbee_api.XBeeAPI({
 
 var serialport;
 
-try {
-  var serialport = new SerialPort(config.xbee.serial.port, {
-    baudrate: config.xbee.serial.baud,
-    parser: xbeeAPI.rawParser()
-  });
-} catch (e) {
-  console.log('Error opening connection to XBee.');
+if (fs.existsSync(config.xbee.serial.port)) {
+    var serialport = new SerialPort(config.xbee.serial.port, {
+      baudrate: config.xbee.serial.baud,
+      parser: xbeeAPI.rawParser()
+    });
+} else {
+  console.log("Serial port %s doesn't exist!", config.xbee.serial.port);
 }
 
-var client = WeMo.Search();
-client.on('found', function(device) {
-    console.log(device);
-    wemoSwitch = new WeMo(device.ip, device.port);
-});
-
 function onDeviceInfo(beaconAddr, bleepAddr) {
-  if (typeof wemoSwitch !== 'undefined') {
-    wemoSwitch.setBinaryState(1, function(err, result) {
-      if (err) console.error(err);
-      console.log(result);
-    });
-  }
+  setWemoSwitchState(ON);
 }
 
 function onDeviceExit(bleep) {
   console.log('Triggering Exit event.');
-  if (typeof wemoSwitch !== 'undefined') {
-    wemoSwitch.setBinaryState(0, function(err, result) {
-      if (err) console.error(err);
-      console.log(result);
-    });
-  } 
+  setWemoSwitchState(OFF);
 }
 
 function saveBleepEvent(event, bleep, beaconAddr) {
@@ -352,15 +389,17 @@ function processDeviceExit(bleepAddr) {
   }
 }
 
-serialport.on("open", function() {
-  // var frame_obj = { // AT Request to be sent to 
-  //   type: C.FRAME_TYPE.AT_COMMAND,
-  //   command: "NI",
-  //   commandParameter: [],
-  // };
+if (typeof serialport !== 'undefined') {
+    serialport.on("open", function() {
+      // var frame_obj = { // AT Request to be sent to 
+      //   type: C.FRAME_TYPE.AT_COMMAND,
+      //   command: "NI",
+      //   commandParameter: [],
+      // };
 
-  // serialport.write(xbeeAPI.buildFrame(frame_obj));
-});
+      // serialport.write(xbeeAPI.buildFrame(frame_obj));
+    });
+}
 
 // All frames parsed by the XBee will be emitted here
 xbeeAPI.on("frame_object", function(frame) {
