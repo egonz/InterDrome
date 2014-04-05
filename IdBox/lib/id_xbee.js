@@ -71,8 +71,6 @@ var xbeeAPI = new xbee_api.XBeeAPI({
   api_mode: 1
 });
 
-var serialport;
-
 if (fs.existsSync(config.xbee.serial.port)) {
     var serialport = new SerialPort(config.xbee.serial.port, {
       baudrate: config.xbee.serial.baud,
