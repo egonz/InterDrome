@@ -11,7 +11,11 @@ var mongoose = require('mongoose'),
 
 // Application Config
 var config = require('./config/config');
+var _lcd;
 
+module.exports = function(lcd) {
+  _lcd = lcd;
+}
 
 /************************************************************
  * WEMO                                                     *

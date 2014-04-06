@@ -29,11 +29,16 @@ fs.readdirSync(modelsPath).forEach(function (file) {
 // Populate empty DB with sample data
 //require('./lib/config/dummydata');
 
-if (process.env.NODE_ENV === 'production') {
-	require('./lib/id_lcd.js');
-}
+var id_network_ip = require('./lib/id_network_ip.js');
 
-require('./lib/id_xbee');
+id_network_ip.getNetworkIPs(function (error, ip) {
+	if (error) {
+		console.log('error:', error);
+	}
+
+	var lcd = require('./lib/id_lcd.js')(ip, config.port);
+	var xbee = require('./lib/id_xbee')(lcd);
+}, false);
 
   
 // Passport Configuration
