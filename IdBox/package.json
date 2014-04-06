@@ -70,6 +70,6 @@
     "test": "grunt test"
   },
   "optionalDependencies": {
-    "adafruit-i2c-lcd": "git://github.com/egonz/adafruit-i2c-lcd"
+    "adafruit-i2c-lcd": "~0.0.1"
   }
 }
