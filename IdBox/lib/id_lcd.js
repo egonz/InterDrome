@@ -28,9 +28,8 @@ module.exports = function(ip_address, port) {
 		_lcd_print("Inter.'.Drome\nOnline");
 	
 		lcd.on('button_down', function (key) {
-		  	console.log('Buton Pressed, Key ' + key);
 			if (key === lcd.buttons.SELECT) {
-				_lcd_print('Web Admin:\n%s:%d', ip_address, port);
+				_lcd_print('Web Admin:\n'+ ip_address + ':' + port);
 			}
 		});
 
