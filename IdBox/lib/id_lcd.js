@@ -2,8 +2,8 @@
 var os=require('os');
 
 module.exports = function(ip_address, port) {
-	var _lcd_print, _lcd_append;
-	var _lcd_set_backlight_color;
+	var _print, _append;
+	var _set_backlight_color;
 	var _colors;
 
 	if (process.env.NODE_ENV === 'production') {
@@ -11,40 +11,35 @@ module.exports = function(ip_address, port) {
 		var lcd= new LCDPLATE('/dev/i2c-1', 0x20);
 		colors = lcd.colors;
 
-		_lcd_print = function(msg) {
+		_print = function(msg, backLightColor) {
 			lcd.clear();
 			lcd.message(msg);
+			_set_backlight_color(backLightColor);
 		}
 
-		_lcd_append = function(msg) {
-			lcd.message(msg);
+		_set_backlight_color = function(color) {
+			if (typeof color !== 'undefined') {
+				lcd.backlight(color);
+			}
 		}
 
-		_lcd_set_backlight_color = function(color) {
-			lcd.backlight(color);
-		}
-
-		_lcd_set_backlight_color(lcd.colors.RED);
-		_lcd_print("Inter.'.Drome\nOnline");
+		_set_backlight_color(lcd.colors.RED);
+		_print("Inter.'.Drome\nOnline");
 	
 		lcd.on('button_down', function (key) {
 			if (key === lcd.buttons.SELECT) {
-				_lcd_print('Web Admin:\n'+ ip_address + ':' + port);
+				_print('Web Admin:\n'+ ip_address + ':' + port);
 			}
 		});
 
 	} else {
 		_colors = {};
 
-		_lcd_print = function(msg) {
+		_print = function(msg) {
 			console.log('LCD: ' + msg);
 		}
 
-		_lcd_append = function(msg) {
-			console.log('LCD: ' + msg);
-		}
-
-		_lcd_set_backlight_color = function(color) {
+		_set_backlight_color = function(color) {
 			console.log('LCD BACKLIGHT COLOR: ' + color);
 		}
 
@@ -52,16 +47,12 @@ module.exports = function(ip_address, port) {
 	}
 
   	return {
-    	lcd_print: function(msg) {
-      		_lcd_print();
+    	print: function(msg) {
+      		_print();
     	},
 
-    	lcd_append: function(msg) {
-			_lcd_append(msg);
-		},
-
-		lcd_set_backlight_color: function(color) {
-			_lcd_set_backlight_color(color);
+		set_backlight_color: function(color) {
+			_set_backlight_color(color);
 		}
   	}
 }
