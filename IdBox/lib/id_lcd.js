@@ -25,12 +25,12 @@ module.exports = function(ip_address, port) {
 		}
 
 		_lcd_set_backlight_color(lcd.colors.RED);
-		lcd_print("Inter.'.Drome ... Online");
+		lcd_print("Inter.'.Drome\nOnline");
 	
 		lcd.on('button_down', function (key) {
 		  	console.log('Buton Pressed, Key ' + key);
 			if (key === lcd.buttons.SELECT) {
-				_lcd_print('Web Admin: http://%s:%d', ip_address, port);
+				_lcd_print('Web Admin:\n%s:%d', ip_address, port);
 			}
 		});
 
