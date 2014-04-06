@@ -29,6 +29,10 @@ fs.readdirSync(modelsPath).forEach(function (file) {
 // Populate empty DB with sample data
 //require('./lib/config/dummydata');
 
+if (process.env.NODE_ENV === 'production') {
+	require('./lib/id_lcd.js');
+}
+
 require('./lib/id_xbee');
 
   
