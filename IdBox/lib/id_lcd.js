@@ -53,6 +53,11 @@ module.exports = function(ip_address, port) {
 
 		set_backlight_color: function(color) {
 			_set_backlight_color(color);
+		
+		},
+
+		colors: function() {
+			return _colors;
 		}
   	}
 }
