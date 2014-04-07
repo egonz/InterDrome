@@ -33,7 +33,17 @@ module.exports = function(ip_address, port) {
 		});
 
 	} else {
-		_colors = {};
+		_colors = {
+	     	OFF: 0x00,
+			RED: 0x01,
+			GREEN: 0x02,
+	      	BLUE: 0x04,
+	      	YELLOW: 0x03,
+	      	TEAL: 0x06,
+	      	VIOLET: 0x05,
+	      	WHITE: 0x07,
+	      	ON: 0x07
+	    };
 
 		_print = function(msg) {
 			console.log('LCD: ' + msg);
