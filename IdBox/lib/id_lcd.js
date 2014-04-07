@@ -4,17 +4,15 @@ var os=require('os');
 module.exports = function(ip_address, port) {
 	var _print, _append;
 	var _set_backlight_color;
-	var _colors;
 
 	if (process.env.NODE_ENV === 'production') {
 		var LCDPLATE=require('adafruit-i2c-lcd').plate;
 		var lcd= new LCDPLATE('/dev/i2c-1', 0x20);
-		colors = lcd.colors;
 
-		_print = function(msg, backLightColor) {
+		_print = function(msg, color) {
 			lcd.clear();
 			lcd.message(msg);
-			_set_backlight_color(backLightColor);
+			_set_backlight_color(color);
 		}
 
 		_set_backlight_color = function(color) {
@@ -33,18 +31,6 @@ module.exports = function(ip_address, port) {
 		});
 
 	} else {
-		_colors = {
-	     	OFF: 0x00,
-			RED: 0x01,
-			GREEN: 0x02,
-	      	BLUE: 0x04,
-	      	YELLOW: 0x03,
-	      	TEAL: 0x06,
-	      	VIOLET: 0x05,
-	      	WHITE: 0x07,
-	      	ON: 0x07
-	    };
-
 		_print = function(msg) {
 			console.log('LCD: ' + msg);
 		}
@@ -57,8 +43,8 @@ module.exports = function(ip_address, port) {
 	}
 
   	return {
-    	print: function(msg) {
-      		_print();
+    	print: function(msg, color) {
+      		_print(msg, color);
     	},
 
 		set_backlight_color: function(color) {
@@ -66,8 +52,16 @@ module.exports = function(ip_address, port) {
 		
 		},
 
-		colors: function() {
-			return _colors;
-		}
+		colors: {
+	     	OFF: 0x00,
+			RED: 0x01,
+			GREEN: 0x02,
+	      	BLUE: 0x04,
+	      	YELLOW: 0x03,
+	      	TEAL: 0x06,
+	      	VIOLET: 0x05,
+	      	WHITE: 0x07,
+	      	ON: 0x07
+	    }
   	}
 }
