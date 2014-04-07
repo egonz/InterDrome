@@ -37,7 +37,17 @@ id_network_ip.getNetworkIPs(function (error, ip) {
 	}
 
 	var lcd = require('./lib/id_lcd.js')(ip, config.port);
-	var xbee = require('./lib/id_xbee')(lcd);
+	var pushover = require('./lib/id_pushover.js')(config);
+	var xbee = require('./lib/id_xbee')(lcd, pushover);
+
+	pushover.send(pushover.message("Inter.'.Drome Startup", 
+	    "Inter.'.Drome"), function(err, result) {
+		if (err) {
+			console.log( 'Error sending Pushover Notification.' );
+		} else {
+			console.log( 'Pushover Notification sent. Result: ' + result );
+		}
+	});
 }, false);
 
   

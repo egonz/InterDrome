@@ -8,13 +8,11 @@ var mongoose = require('mongoose'),
     Bleep = mongoose.model('Bleep'),
     BleepEvent = mongoose.model('BleepEvent');
 
-module.exports = function(lcd) {
-  _lcd = lcd;
-
+module.exports = function(lcd, pushover) {
   // Application Config
   var config = require('./config/config');
-  var _lcd;
-    
+  var lcd;
+
 
   /************************************************************
    * WEMO                                                     *
@@ -32,7 +30,7 @@ module.exports = function(lcd) {
       wemoClient.on('found', function(device) {
         console.log(device);
         wemoSwitch = new WeMo(device.ip, device.port);
-        _lcd.print('Connected to\nWemo Switch\n', _lcd.colors.YELLOW);
+        lcd.print('Connected to\nWemo Switch\n', lcd.colors.GREEN);
         flashLights();
       });
     }
@@ -70,6 +68,8 @@ module.exports = function(lcd) {
    ************************************************************/
 
   var C = xbee_api.constants;
+  var EXIT = 'EXIT';
+  var ENTER = 'ENTER';
 
   var xbeeAPI = new xbee_api.XBeeAPI({
     api_mode: 1
@@ -91,9 +91,32 @@ module.exports = function(lcd) {
   function onDeviceExit(bleep) {
     console.log('Triggering Exit event.');
     setWemoSwitchState(OFF);
+    
+    lcd.print('Device Exit\n' + new Date(), lcd.colors.GREEN);
+
+    pushover.send(pushover.message('BLEEP Exit: ' +
+      bleep.address, 'BLEEP Exit'), function(err, result) {
+        if (err) {
+          console.log( 'Error sending Pushover Notification.' );
+        } else {
+          console.log( 'Pushover Notification sent. Result: ' + result );
+        }
+    });
   }
 
   function saveBleepEvent(event, bleep, beaconAddr) {
+    if (event === ENTER) {
+      lcd.print('Device Enter\n' + new Date(), lcd.colors.GREEN);
+      pushover.send(pushover.message('Device Enter. Address: ' +
+        beaconAddr, 'Device Enter'), function(err, result) {
+          if (err) {
+            console.log( 'Error sending Pushover Notification.' );
+          } else {
+            console.log( 'Pushover Notification sent. Result: ' + result );
+          }
+      });
+    }
+
     Beacon.findOne({ address: beaconAddr }, function (err, beacon) {
       if (err) {
         console.log('Error finding beacon addr ' + beaconAddr);
@@ -171,7 +194,7 @@ module.exports = function(lcd) {
     //Check for beacon exits
     for (var i = 0; i < bleepBeacons.length; i++) {
       console.log('Creating Beacon exit for ' + bleepBeacons[i].address);
-      saveBleepEvent('EXIT', bleep, bleepBeacons[i].address);
+      saveBleepEvent(EXIT, bleep, bleepBeacons[i].address);
       clearBleepForBeacon(bleepBeacons[i].address);
     }
   }
@@ -199,7 +222,7 @@ module.exports = function(lcd) {
             enters.push(beacon._id);
             bleep.beacons.push(beacon._id);
             //Create Enter event
-            saveBleepEvent('ENTER', bleep, beacon.address);
+            saveBleepEvent(ENTER, bleep, beacon.address);
           }
           checkForEnters(bleep, beaconAddrs, exits, enters, ++index);
         });
@@ -224,7 +247,7 @@ module.exports = function(lcd) {
         if (beaconAddrs.indexOf(bleepBeacons[i].address) <= -1) {
           exits.push(bleepBeacons[i]);
           //Create exit event
-          saveBleepEvent('EXIT', bleep, bleepBeacons[i]);
+          saveBleepEvent(EXIT, bleep, bleepBeacons[i]);
           clearBleepForBeacon(bleepBeacons[i].address);
         }
       }
