@@ -24,10 +24,10 @@ angular.module('interDromeApp', [
         templateUrl: 'partials/settings',
         controller: 'SettingsCtrl',
         authenticate: true
-      })
-      .otherwise({
-        redirectTo: '/'
       });
+      // .otherwise({
+      //   redirectTo: '/'
+      // });
       
     $locationProvider.html5Mode(true);
       
