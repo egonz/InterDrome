@@ -13,6 +13,10 @@ module.exports = function(lcd, pushover) {
   var config = require('./config/config');
   var lcd;
 
+  lcd.add_button_listener(function(key) {
+    console.log('Key Press Recieved in XBee module; key=' + key);
+  });
+
 
   /************************************************************
    * WEMO                                                     *

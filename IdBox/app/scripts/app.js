@@ -9,8 +9,8 @@ angular.module('interDromeApp', [
   .config(function ($routeProvider, $locationProvider, $httpProvider) {
     $routeProvider
       .when('/', {
-        templateUrl: 'partials/main',
-        controller: 'MainCtrl'
+        templateUrl: 'partials/login',
+        controller: 'LoginCtrl'
       })
       .when('/login', {
         templateUrl: 'partials/login',

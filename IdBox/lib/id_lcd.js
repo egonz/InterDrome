@@ -4,6 +4,7 @@ var os=require('os');
 module.exports = function(ip_address, port) {
 	var _print, _append;
 	var _set_backlight_color;
+	var _button_listeners = [];
 
 	if (process.env.NODE_ENV === 'production') {
 		var LCDPLATE=require('adafruit-i2c-lcd').plate;
@@ -26,8 +27,12 @@ module.exports = function(ip_address, port) {
 	
 		lcd.on('button_down', function (key) {
 			if (key === lcd.buttons.SELECT) {
-				_print('Web Admin:\n'+ ip_address + ':' + port, lcd.colors.YELLOW);
+				_print(ip_address + ':\n' + port, lcd.colors.YELLOW);
 			}
+
+			_button_listeners.forEach(function(element, index, array) {
+				element(key);
+			});
 		});
 
 	} else {
@@ -42,6 +47,17 @@ module.exports = function(ip_address, port) {
 		console.log("Inter.'.Drome ... Online");
 	}
 
+	function _shutdown() {
+		child = exec('sudo shutdown -t 0 now',
+		  function (error, stdout, stderr) {
+		    console.log('stdout: ' + stdout);
+		    console.log('stderr: ' + stderr);
+		    if (error !== null) {
+		      console.log('exec error: ' + error);
+		    }
+		});
+	}
+
   	return {
     	print: function(msg, color) {
       		_print(msg, color);
@@ -50,6 +66,10 @@ module.exports = function(ip_address, port) {
 		set_backlight_color: function(color) {
 			_set_backlight_color(color);
 		
+		},
+
+		add_button_listener: function(callback) {
+			_button_listeners.push(callback);
 		},
 
 		colors: {

@@ -2,6 +2,8 @@ $icon-font-path: "/bower_components/bootstrap-sass-official/vendor/assets/fonts/
 
 @import 'bootstrap-sass-official/vendor/assets/stylesheets/bootstrap';
 
+@import 'login';
+
 .browsehappy {
     margin: 0.2em 0;
     background: #ccc;
@@ -70,7 +72,7 @@ body {
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {
     .container {
-        max-width: 730px;
+        max-width: 1024px;
     }
 
     /* Remove the padding we set earlier */
