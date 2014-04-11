@@ -111,7 +111,7 @@ module.exports = function(lcd, pushover) {
 
   function saveBleepEvent(event, bleep, beaconAddr) {
     if (event === ENTER) {
-      lcd.print('Device Enter\n' + new Date(), lcd.colors.GREEN);
+      lcd.print('Device Enter\n' + new Date().format("hh:mm:ss"), lcd.colors.GREEN);
       pushover.send(pushover.message('Device Enter. Address: ' +
         beaconAddr, 'Device Enter'), function(err, result) {
           if (err) {
