@@ -6,7 +6,8 @@ var WeMo = new require('wemo');
 var mongoose = require('mongoose'),
     Beacon = mongoose.model('Beacon'),
     Bleep = mongoose.model('Bleep'),
-    BleepEvent = mongoose.model('BleepEvent');
+    BleepEvent = mongoose.model('BleepEvent'),
+    DateUtil = require('./date_util');
 
 module.exports = function(lcd, pushover) {
   // Application Config
@@ -96,7 +97,7 @@ module.exports = function(lcd, pushover) {
     console.log('Triggering Exit event.');
     setWemoSwitchState(OFF);
     
-    lcd.print('Device Exit\n' + new Date(), lcd.colors.GREEN);
+    lcd.print('Device Exit\n' + new Date().format("hh:mm:ss"), lcd.colors.GREEN);
 
     pushover.send(pushover.message('BLEEP Exit: ' +
       bleep.address, 'BLEEP Exit'), function(err, result) {

@@ -48,6 +48,13 @@ id_network_ip.getNetworkIPs(function (error, ip) {
 			console.log( 'Pushover Notification sent. Result: ' + result );
 		}
 	});
+
+	process.on( 'SIGINT', function() {
+	  console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
+	  lcd.turn_off();
+	  // some other closing procedures go here
+	  process.exit( );
+	});
 }, false);
 
   
