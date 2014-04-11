@@ -9,25 +9,26 @@ angular.module('interDromeApp', [
   .config(function ($routeProvider, $locationProvider, $httpProvider) {
     $routeProvider
       .when('/', {
-        templateUrl: 'partials/login',
-        controller: 'LoginCtrl'
+        templateUrl: 'partials/main',
+        controller: 'MainCtrl',
+        authenticate: true
       })
       .when('/login', {
         templateUrl: 'partials/login',
         controller: 'LoginCtrl'
       })
-      .when('/signup', {
-        templateUrl: 'partials/signup',
-        controller: 'SignupCtrl'
+      .when('/adduser', {
+        templateUrl: 'partials/adduser',
+        controller: 'AddUserCtrl'
       })
       .when('/settings', {
         templateUrl: 'partials/settings',
         controller: 'SettingsCtrl',
         authenticate: true
+      })
+      .otherwise({
+        redirectTo: '/'
       });
-      // .otherwise({
-      //   redirectTo: '/'
-      // });
       
     $locationProvider.html5Mode(true);
       

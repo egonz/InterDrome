@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('interDromeApp')
-  .controller('SignupCtrl', function ($scope, Auth, $location) {
+  .controller('AddUserCtrl', function ($scope, Auth, $location) {
     $scope.user = {};
     $scope.errors = {};
 

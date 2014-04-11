@@ -98,6 +98,11 @@ angular.module('interDromeApp')
         return User.get();
       },
 
+      adminUser: function() {
+        var user = User.get();
+        return user;
+      },
+
       /**
        * Simple check to see if a user is logged in
        * 
