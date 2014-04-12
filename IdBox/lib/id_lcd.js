@@ -48,6 +48,10 @@ module.exports = function(ip_address, port) {
 			console.log('LCD BACKLIGHT COLOR: ' + color);
 		}
 
+		_turn_off = function() {
+			console.log('Turning off lcd');
+		}
+
 		console.log("Inter.'.Drome ... Online");
 	}
 

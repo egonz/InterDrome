@@ -5,9 +5,22 @@ var express = require('express'),
     fs = require('fs'),
     mongoose = require('mongoose');
 
+var lcd,
+    pushover,
+    xbee;
+
 /**
  * Main application file
  */
+
+ process.on('SIGINT', function() {
+	console.log("\nGracefully shutting down from SIGINT (Ctrl-C)");
+	
+	if (typeof lcd !== 'undefined')
+		lcd.turn_off();
+	// some other closing procedures go here
+	process.exit();
+});
 
 // Set default node environment to development
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -36,9 +49,9 @@ id_network_ip.getNetworkIPs(function (error, ip) {
 		console.log('error:', error);
 	}
 
-	var lcd = require('./lib/id_lcd.js')(ip, config.port);
-	var pushover = require('./lib/id_pushover.js')(config);
-	var xbee = require('./lib/id_xbee')(lcd, pushover);
+	lcd = require('./lib/id_lcd.js')(ip, config.port);
+	pushover = require('./lib/id_pushover.js')(config);
+	xbee = require('./lib/id_xbee')(lcd, pushover);
 
 	pushover.send(pushover.message("Inter.'.Drome Startup", 
 	    "Inter.'.Drome"), function(err, result) {
@@ -49,15 +62,10 @@ id_network_ip.getNetworkIPs(function (error, ip) {
 		}
 	});
 
-	process.on( 'SIGINT', function() {
-	  console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
-	  lcd.turn_off();
-	  // some other closing procedures go here
-	  process.exit( );
-	});
+	lcd.turn_off();
 }, false);
 
-  
+
 // Passport Configuration
 var passport = require('./lib/config/passport');
 
