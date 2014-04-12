@@ -18,6 +18,18 @@ var lcd,
 	
 	if (typeof lcd !== 'undefined')
 		lcd.turn_off();
+
+	if (typeof pushover !== 'undefined') {
+		pushover.send(pushover.message('Shutting Down.', 
+			'Shutting Down'), function(err, result) {
+			if (err) {
+            	console.log( 'Error sending Pushover Notification.' );
+          	} else {
+            	console.log( 'Pushover Notification sent. Result: ' + result );
+          	}
+      	});
+	}
+
 	// some other closing procedures go here
 	process.exit();
 });
