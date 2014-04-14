@@ -1,0 +1,29 @@
+<div ng-include="'partials/navbar'"></div>
+
+<div class="row">
+	<input id="interzone-addr-input" type="text" ng-autocomplete="" ng-model="autocomplete" options="options" details="details">
+	<button type="button" class="btn btn-default btn-sm">
+  		<span class="glyphicon glyphicon-map-marker"></span> Map It
+	</button>
+</div>
+
+<span ng-if="details.geometry.location">
+	<div class="row">
+		<button type="button" class="btn btn-default btn-sm" ng-click="editFloorPlan()" ng-hide="showFloorPlan">
+	  		<span class="glyphicon glyphicon-edit"></span> Edit Floor Plan
+		</button>
+
+		<button type="button" class="btn btn-default btn-sm" ng-click="saveFloorPlan()" ng-show="showFloorPlan">
+	  		<span class="glyphicon glyphicon-edit"></span> Save Floor Plan
+		</button>
+	</div>
+	<div class="row">
+		lat: {{details.geometry.location.k}} lon: {{details.geometry.location.A}}
+	</div>
+	<div class="row">	
+		<google-map id="interzone-map" center="{latitude: details.geometry.location.k, longitude: details.geometry.location.A}" zoom="map.zoom" draggable="true" dragging-cursor="hand" options="map.options">
+		</google-map>
+	</div>
+	<div id="floorplan" class="row" ng-show="showFloorPlan">
+	</div>
+</span>

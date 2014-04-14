@@ -5,6 +5,7 @@
     </li>
     <li ng-hide="currentUser" ng-class="{active: isActive('/login')}"><a href="/login">Login</a></li>
     <li ng-show="adminUser" ng-class="{active: isActive('/adduser')}"><a href="/adduser">Add User</a></li>
+    <li ng-show="currentUser" ng-class="{active: isActive('/interzone')}"><a href="/interzone">Inter.'.Zones</a></li>
     <li ng-show="currentUser" ng-class="{active: isActive('/logout')}"><a href="" ng-click="logout()">Logout</a></li>
   </ul>
   <h3 class="text-muted">Inter.'.Drome</h3>
