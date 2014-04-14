@@ -1,0 +1,21 @@
+$interzone-map-width: 640px;
+$interzone-map-height: 400px;
+
+.angular-google-map-container { 
+	width: $interzone-map-width; 
+	height: $interzone-map-height; 
+}
+
+#interzone-addr-input { width: 400px; }
+
+#interzone-map { position: absolute; }
+
+#floorplan { 
+	position: relative; 
+	width: $interzone-map-width - 20; 
+	height: $interzone-map-height - 20;
+	color: white;
+	font-weight: bold;
+	border: 3px dashed red;
+	z-index: 999;
+}

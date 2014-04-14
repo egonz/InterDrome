@@ -1,19 +1,15 @@
 <div ng-include="'partials/navbar'"></div>
 
-<script src="bower_components/modernizr/modernizr.js"></script>
-<script src="bower_components/kineticjs/kinetic.js"></script>
-<script src="scripts/main.js" defer="defer"></script>
-
 <div class="row">
   <h2>Inter.'.Zone 1</h2>
 </div>
 
 <div class="row">
-  <div id="container"></div>
+  <button id="add-bleep" type="button" class="btn btn-default btn-md" ng-click="add_bleep()">
+    <span class="glyphicon glyphicon-plus"></span> Add BLEEP
+  </button>
 </div>
 
 <div class="row">
-  <button id="add-bleep" type="button" class="btn btn-default btn-lg">
-    <span class="glyphicon glyphicon-plus"></span> Add BLEEP
-  </button>
+  <div id="container"></div>
 </div>

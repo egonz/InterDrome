@@ -4,7 +4,9 @@ angular.module('interDromeApp', [
   'ngCookies',
   'ngResource',
   'ngSanitize',
-  'ngRoute'
+  'ngRoute',
+  'google-maps',
+  'ngAutocomplete'
 ])
   .config(function ($routeProvider, $locationProvider, $httpProvider) {
     $routeProvider
@@ -24,6 +26,11 @@ angular.module('interDromeApp', [
       .when('/settings', {
         templateUrl: 'partials/settings',
         controller: 'SettingsCtrl',
+        authenticate: true
+      })
+      .when('/interzone', {
+        templateUrl: 'partials/interzone',
+        controller: 'InterZoneCtrl',
         authenticate: true
       })
       .otherwise({
