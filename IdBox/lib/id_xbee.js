@@ -3,21 +3,29 @@ var fs = require('fs');
 var SerialPort = require('serialport').SerialPort;
 var xbee_api = require('xbee-api');
 var WeMo = new require('wemo');
+var hue = require("./id_hue");
 var mongoose = require('mongoose'),
     Beacon = mongoose.model('Beacon'),
     Bleep = mongoose.model('Bleep'),
     BleepEvent = mongoose.model('BleepEvent'),
     DateUtil = require('./date_util');
 
+// TODO Consider moving Device Event processing into another module. 
+
 module.exports = function(lcd, pushover) {
   // Application Config
   var config = require('./config/config');
   var lcd;
+  var WEMO = lcd.buttons.LEFT;
+  var HUE = lcd.buttons.RIGHT;
 
   lcd.add_button_listener(function(key) {
-    console.log('Key Press Recieved in XBee module; key=' + key);
+    if (key === WEMO) {
+      console.log("Switching to WEMO");
+    } else if (key === HUE) {
+      console.log("Switching to HUE");
+    }
   });
-
 
   /************************************************************
    * WEMO                                                     *
