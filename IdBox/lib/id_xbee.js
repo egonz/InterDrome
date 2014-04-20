@@ -12,7 +12,7 @@ var mongoose = require('mongoose'),
 
 // TODO Consider moving Device Event processing into another module. 
 
-module.exports = function(lcd, pushover) {
+module.exports = function(lcd, pushover, socket) {
   // Application Config
   var config = require('./config/config');
   var lcd;
@@ -107,6 +107,8 @@ module.exports = function(lcd, pushover) {
     
     lcd.print('Device Exit\n' + new Date().format("hh:mm:ss"), lcd.colors.GREEN);
 
+    socket.emit('bleep-exit', {bleep: bleep});
+
     pushover.send(pushover.message('BLEEP Exit: ' +
       bleep.address, 'BLEEP Exit'), function(err, result) {
         if (err) {
@@ -120,6 +122,9 @@ module.exports = function(lcd, pushover) {
   function saveBleepEvent(event, bleep, beaconAddr) {
     if (event === ENTER) {
       lcd.print('Device Enter\n' + new Date().format("hh:mm:ss"), lcd.colors.GREEN);
+
+      socket.emit('bleep-enter', {bleep: bleep, beaconAddr: beaconAddr});
+      
       pushover.send(pushover.message('Device Enter. Address: ' +
         beaconAddr, 'Device Enter'), function(err, result) {
           if (err) {

@@ -6,6 +6,12 @@ angular.module('interDromeApp')
       'title': 'Home',
       'link': '/'
     }, {
+      'title': "Inter.'.Zones",
+      'link': '/interzone'
+    }, {
+      'title': 'Controls',
+      'link': '/controls'
+    }, {
       'title': 'Settings',
       'link': '/settings'
     }];

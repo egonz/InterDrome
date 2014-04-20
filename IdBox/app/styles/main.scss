@@ -2,10 +2,11 @@ $icon-font-path: "/bower_components/bootstrap-sass-official/vendor/assets/fonts/
 
 @import 'bootstrap-sass-official/vendor/assets/stylesheets/bootstrap';
 
-@import 'x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css';
+@import '/bower_components/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css';
 
 @import 'login';
 @import 'interzone';
+@import 'control';
 
 .browsehappy {
     margin: 0.2em 0;
@@ -70,6 +71,11 @@ body {
 
 .marketing p + h4 {
     margin-top: 28px;
+}
+
+.panel-heading {
+    font-size: 14pt;
+    font-weight: bold;
 }
 
 /* Responsive: Portrait tablets and up */

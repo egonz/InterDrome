@@ -1,8 +1,20 @@
 'use strict';
 
 angular.module('interDromeApp')
-  .controller('MainCtrl', function ($scope, $http) {
+  .controller('MainCtrl', function ($scope, idSocket) {
   	
+  	$scope.$on('socket:connected', function (ev, data) {
+  		console.log('Connected');
+    });
+
+    $scope.$on('socket:bleep-enter', function (ev, data) {
+  		console.log('BLEEP Enter ' + JSON.stringify(data));
+    });
+
+    $scope.$on('socket:bleep-exit', function (ev, data) {
+  		console.log('BLEEP Exit ' + JSON.stringify(data));
+    });
+
 	var stage = new Kinetic.Stage({
 	  container: 'container',
 	  width: 480,

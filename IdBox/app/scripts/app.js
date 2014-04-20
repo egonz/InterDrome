@@ -6,8 +6,25 @@ angular.module('interDromeApp', [
   'ngSanitize',
   'ngRoute',
   'google-maps',
-  'ngAutocomplete'
+  'ngAutocomplete',
+  'btford.socket-io',
+  'ui.bootstrap'
 ])
+  .factory('idSocket', function (socketFactory) {
+    console.log('Creating Socket.io connection factory');
+    var mySocket = socketFactory();
+    mySocket.forward('connected');
+    mySocket.forward('bleep-enter');
+    mySocket.forward('bleep-exit');
+    mySocket.forward('hue-bridges');
+    mySocket.forward('hue-bridge-registration-complete');
+    mySocket.forward('hue-bridge-get-lights');
+    mySocket.forward('hue-bridge-lights');
+    mySocket.forward('wemo-discovery');
+    mySocket.forward('xbee');
+
+    return mySocket;
+  })
   .config(function ($routeProvider, $locationProvider, $httpProvider) {
     $routeProvider
       .when('/', {
@@ -31,6 +48,11 @@ angular.module('interDromeApp', [
       .when('/interzone', {
         templateUrl: 'partials/interzone',
         controller: 'InterZoneCtrl',
+        authenticate: true
+      })
+      .when('/controls', {
+        templateUrl: 'partials/controls',
+        controller: 'ControlCtrl',
         authenticate: true
       })
       .otherwise({
@@ -64,3 +86,7 @@ angular.module('interDromeApp', [
       }
     });
   });
+
+  String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+  }

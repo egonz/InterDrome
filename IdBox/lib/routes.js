@@ -3,7 +3,8 @@
 var api = require('./controllers/api'),
     index = require('./controllers'),
     users = require('./controllers/users'),
-    session = require('./controllers/session');
+    session = require('./controllers/session'),
+    hue = require('./controllers/hue');
 
 var middleware = require('./middleware');
 
@@ -22,6 +23,9 @@ module.exports = function(app) {
 
   app.post('/api/session', session.login);
   app.del('/api/session', session.logout);
+
+  app.get('/api/hue/bridges/test', hue.test);
+  app.get('/api/hue/bridges', hue.bridges);
 
   // All undefined api routes should return a 404
   app.get('/api/*', function(req, res) {
