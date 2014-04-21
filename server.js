@@ -7,7 +7,9 @@ var express = require('express'),
 
 var lcd,
     pushover,
-    xbee;
+    xbee,
+    hue,
+    wemo;
 
 /**
  * Main application file
@@ -54,16 +56,25 @@ fs.readdirSync(modelsPath).forEach(function (file) {
 // Populate empty DB with sample data
 require('./lib/config/dummydata');
 
-var id_network_ip = require('./lib/id_network_ip.js');
+
+// Passport Configuration
+var passport = require('./lib/config/passport');
+
+var app = express(),
+	server = require('http').createServer(app),
+	id_network_ip = require('./lib/id_network_ip.js'),
+	socket = require('./lib/id_socket')(server);
 
 id_network_ip.getNetworkIPs(function (error, ip) {
 	if (error) {
 		console.log('error:', error);
 	}
 
-	lcd = require('./lib/id_lcd.js')(ip, config.port);
-	pushover = require('./lib/id_pushover.js')(config);
-	xbee = require('./lib/id_xbee')(lcd, pushover);
+	lcd = require('./lib/id_lcd')(ip, config.port);
+	hue = require('./lib/id_hue')(socket);
+	wemo = require('./lib/id_wemo')(lcd);
+	pushover = require('./lib/id_pushover')(config);
+	xbee = require('./lib/id_xbee')(lcd, pushover, socket, wemo, hue);
 
 	pushover.send(pushover.message("Inter.'.Drome Startup", 
 	    "Inter.'.Drome"), function(err, result) {
@@ -77,12 +88,6 @@ id_network_ip.getNetworkIPs(function (error, ip) {
 	lcd.turn_off();
 }, false);
 
-
-// Passport Configuration
-var passport = require('./lib/config/passport');
-
-var app = express();
-
 // Express settings
 require('./lib/config/express')(app);
 
@@ -90,8 +95,8 @@ require('./lib/config/express')(app);
 require('./lib/routes')(app);
 
 // Start server
-app.listen(config.port, function () {
-  console.log('Express server listening on port %d in %s mode', config.port, app.get('env'));
+server.listen(config.port, function(){
+    console.log("Express server listening on port %d in %s mode", config.port, app.get('env'));
 });
 
 // Expose app

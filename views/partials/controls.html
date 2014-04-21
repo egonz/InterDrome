@@ -1,0 +1,82 @@
+<div ng-include="'partials/navbar'"></div>
+
+<div class="row">
+	<div class="panel panel-default">
+		<div class="panel-heading">Phillips Hue</div>
+		<div class="panel-body">
+			 <button class="btn btn-info btn-sm" ng-click="discoverHueBridges()" ng-disabled="discoverHueBridgeDisabled">
+			 	<i ng-class="{true:'fa fa-spinner fa-spin', false:'glyphicon glyphicon-search'}[discoverHueBridgeDisabled]"></i> Discover
+			 </button>
+		</div>
+
+		<table class="table table-hover">
+			<th>Name</th>
+			<th>IP Address</th>
+			<th>Registered</th>
+			<th></th>
+	    	<tr ng-repeat="bridge in hueBridges.bridges">
+	    		<td>{{bridge.name}}</td>
+		      	<td>{{bridge.ipaddress}}</td>
+		      	<td>
+			        <span ng-show="bridge.user">
+						Yes
+					</span>
+					<span ng-show="!bridge.user">
+						No
+					</span>
+			  	</td>
+			  	<td>
+			      	<button class="btn btn-success btn-sm" data-toggle="modal" data-target="#register-bridge" ng-click="openHueBidgeModal(bridge)"> <i class="glyphicon glyphicon-cog"></i> Configure
+			        </button>
+			  	</td>
+	    	</tr>
+	  	</table>
+	</div>
+</div>
+
+<div>
+    <script type="text/ng-template" id="hue-bridge-modal-register-content">
+        <div class="modal-header">
+            <h4>Press the Link Button on the bridge and then click the <span style="color:#428bca;">Register</span> button in this window below.</h4>
+        </div>
+        <div class="modal-body modal-step">
+            Step 1: <img src="images/98d932f3.smartbridge.jpg" width="421" height="250" />
+        </div>
+        <div class="modal-footer">
+        	<span class="modal-step">Step 2:</span> <button class="btn btn-primary" ng-click="register()" ng-disabled="registerHueBridgeDisabled">
+			 	<i ng-class="{true:'fa fa-spinner fa-spin', false:'glyphicon glyphicon-link'}[registerHueBridgeDisabled]"></i> Register
+			 </button>
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+        </div>
+        <div>
+		  	<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+		</div>
+    </script>
+</div>
+
+<div>
+    <script type="text/ng-template" id="hue-bridge-modal-lights-content">
+        <div class="modal-header">
+            <h4>Lights</h4>
+        </div>
+        <div class="modal-body modal-step">
+            <div ng-repeat="light in lights">
+            	<div class="modal-lights">
+	            	<button class="btn btn-success btn-sm" ng-click="turnOn(light)"> 
+	            		<i class="fa fa-lightbulb-o"></i> On
+	            	</button>
+	            	<button class="btn btn-danger btn-sm" ng-click="turnOff(light)"> 
+	            		<i class="fa fa-power-off"></i> Off
+	            	</button>
+	            	{{light.name}}
+	            </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+        	<button class="btn btn-warning" ng-click="cancel()">Close</button>
+        </div>
+        <div>
+		  	<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+		</div>
+    </script>
+</div>
