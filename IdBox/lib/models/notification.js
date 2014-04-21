@@ -6,10 +6,8 @@ var mongoose = require('mongoose'),
 /**
  * Bleep Schema
  */
-var BleepSchema = new Schema({
-  name: String,
-  address: String,
-  beacons: [{ type: Schema.Types.ObjectId, ref: 'Beacon' }],
+var NotificationSchema = new Schema({
+  pushover_user: String,
   created: Date,
   updated: Date
 });
@@ -18,4 +16,4 @@ var BleepSchema = new Schema({
  * Validations
  */
 
-mongoose.model('Bleep', BleepSchema);
+mongoose.model('Notification', NotificationSchema);

@@ -8,8 +8,8 @@ var express = require('express'),
 var lcd,
     pushover,
     xbee,
-    socket,
-    hue;
+    hue,
+    wemo;
 
 /**
  * Main application file
@@ -72,8 +72,9 @@ id_network_ip.getNetworkIPs(function (error, ip) {
 
 	lcd = require('./lib/id_lcd')(ip, config.port);
 	hue = require('./lib/id_hue')(socket);
+	wemo = require('./lib/id_wemo')(lcd);
 	pushover = require('./lib/id_pushover')(config);
-	xbee = require('./lib/id_xbee')(lcd, pushover, socket);
+	xbee = require('./lib/id_xbee')(lcd, pushover, socket, wemo, hue);
 
 	pushover.send(pushover.message("Inter.'.Drome Startup", 
 	    "Inter.'.Drome"), function(err, result) {

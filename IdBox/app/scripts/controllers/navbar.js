@@ -12,6 +12,15 @@ angular.module('interDromeApp')
       'title': 'Controls',
       'link': '/controls'
     }, {
+      'title': 'Bleeps',
+      'link': '/bleeps'
+    }, {
+      'title': 'Events',
+      'link': '/events'
+    }, {
+      'title': 'Notifications',
+      'link': '/notifications'
+    }, {
       'title': 'Settings',
       'link': '/settings'
     }];

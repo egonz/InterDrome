@@ -1,9 +1,17 @@
 'use strict';
 
-angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $http) {
+angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $http, idSocket) {
     $scope.width = 960;
     $scope.height = 500;
     $scope.showFloorPlan = false;
+
+    $scope.$on('socket:bleep-enter', function (ev, data) {
+  		console.log('BLEEP Enter ' + JSON.stringify(data));
+    });
+
+    $scope.$on('socket:bleep-exit', function (ev, data) {
+  		console.log('BLEEP Exit ' + JSON.stringify(data));
+    });
 
     var mapOptions = {
         panControl    : true,

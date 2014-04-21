@@ -55,6 +55,21 @@ angular.module('interDromeApp', [
         controller: 'ControlCtrl',
         authenticate: true
       })
+      .when('/bleeps', {
+        templateUrl: 'partials/bleep',
+        controller: 'BleepCtrl',
+        authenticate: true
+      })
+      .when('/events', {
+        templateUrl: 'partials/events',
+        controller: 'EventCtrl',
+        authenticate: true
+      })
+      .when('/notifications', {
+        templateUrl: 'partials/notifications',
+        controller: 'NotificationCtrl',
+        authenticate: true
+      })
       .otherwise({
         redirectTo: '/'
       });

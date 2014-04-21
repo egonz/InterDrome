@@ -1,10 +1,9 @@
-var util = require('util');
-var fs = require('fs');
-var SerialPort = require('serialport').SerialPort;
-var xbee_api = require('xbee-api');
-var WeMo = new require('wemo');
-var hue = require("./id_hue");
-var mongoose = require('mongoose'),
+var util = require('util'),
+    fs = require('fs'),
+    config = require('./config/config'),
+    SerialPort = require('serialport').SerialPort,
+    xbee_api = require('xbee-api'),
+    mongoose = require('mongoose'),
     Beacon = mongoose.model('Beacon'),
     Bleep = mongoose.model('Bleep'),
     BleepEvent = mongoose.model('BleepEvent'),
@@ -12,68 +11,18 @@ var mongoose = require('mongoose'),
 
 // TODO Consider moving Device Event processing into another module. 
 
-module.exports = function(lcd, pushover, socket) {
+module.exports = function(lcd, pushover, socket, wemo, hue) {
   // Application Config
-  var config = require('./config/config');
-  var lcd;
-  var WEMO = lcd.buttons.LEFT;
-  var HUE = lcd.buttons.RIGHT;
+  var WEMO_KEY = lcd.buttons.LEFT;
+  var HUE_KEY = lcd.buttons.RIGHT;
 
   lcd.add_button_listener(function(key) {
-    if (key === WEMO) {
+    if (key === WEMO_KEY) {
       console.log("Switching to WEMO");
-    } else if (key === HUE) {
+    } else if (key === HUE_KEY) {
       console.log("Switching to HUE");
     }
   });
-
-  /************************************************************
-   * WEMO                                                     *
-   ************************************************************/
-
-  //TODO move this into a different JS file
-  var ON = 1, OFF = 0;
-  var wemoClient, wemoSwitch;
-
-  var flashLights;
-
-  var wemoSearch = setInterval(function() {
-    if (typeof wemoSwitch === 'undefined') {
-      wemoClient = WeMo.Search();
-      wemoClient.on('found', function(device) {
-        console.log(device);
-        wemoSwitch = new WeMo(device.ip, device.port);
-        lcd.print('Connected to\nWemo Switch\n', lcd.colors.GREEN);
-        flashLights();
-      });
-    }
-  }, 5000);
-
-  function setWemoSwitchState(state, callback) {
-    if (typeof wemoSwitch !== 'undefined') {
-      wemoSwitch.setBinaryState(state, function(err, result) {
-        if (err) {
-          console.error('Error sending ' + (state===ON?'ON':'OFF') + 
-            ' signal to Wemo Switch. ' + err);
-          wemoSwitch = undefined;
-        }
-        if (typeof callback !== 'undefined')
-          callback();
-      });
-    }
-  }
-
-  flashLights = function() {
-    setWemoSwitchState(OFF, function() {
-      setTimeout(function() {
-        setWemoSwitchState(ON, function() {
-          setTimeout(function() {
-            setWemoSwitchState(OFF);
-          }, 2000);
-        });
-      }, 2000);
-    });
-  }
 
 
   /************************************************************
@@ -98,12 +47,19 @@ module.exports = function(lcd, pushover, socket) {
   }
 
   function onDeviceInfo(beaconAddr, bleepAddr) {
-    setWemoSwitchState(ON);
+    //TODO Send To BleepAction handler
+    for (var deviceName in wemo.getDevices()) {
+      wemo.turnOn(wemo.getDevices()[deviceName]);
+    }
   }
 
   function onDeviceExit(bleep) {
     console.log('Triggering Exit event.');
-    setWemoSwitchState(OFF);
+    
+    //TODO Send To BleepAction handler
+    for (var deviceName in wemo.getDevices()) {
+      wemo.turnOff(wemo.getDevices()[deviceName]);
+    }
     
     lcd.print('Device Exit\n' + new Date().format("hh:mm:ss"), lcd.colors.GREEN);
 
