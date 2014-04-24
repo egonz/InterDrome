@@ -21,6 +21,8 @@ angular.module('interDromeApp', [
     mySocket.forward('hue-bridge-get-lights');
     mySocket.forward('hue-bridge-lights');
     mySocket.forward('wemo-discovery');
+    mySocket.forward('wemo-found');
+    mySocket.forward('wemo-set-binary-state-result');
     mySocket.forward('xbee');
 
     return mySocket;

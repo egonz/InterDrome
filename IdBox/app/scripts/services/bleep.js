@@ -7,7 +7,10 @@ angular.module('interDromeApp')
     }, { //parameters default
       update: {
         method: 'PUT',
-        params: {}
+        params: {
+          id: '@id',
+          name: '@name'
+        }
       },
       get: {
         method: 'GET',

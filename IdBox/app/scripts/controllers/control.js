@@ -1,17 +1,45 @@
 'use strict';
 
 angular.module('interDromeApp')
-  .controller('ControlCtrl', function ($scope, idSocket, HueBridge, $modal, $log) {
+  .controller('ControlCtrl', function ($scope, idSocket, HueBridge, Wemo, $modal, $log) {
   	
   	var modalInstance;
 
   	$scope.discoverHueBridgeDisabled = false;
+    $scope.discoverWemoDevicesDisabled = false;
   	$scope.hueBridges = HueBridge.get();
+    $scope.wemo;// = Wemo.get();
 
   	$scope.$on('socket:hue-bridges', function (ev, data) {
   		console.log('Hue Bridges Discovered ' + JSON.stringify(data));
   		$scope.discoverHueBridgeDisabled = false;
   		$scope.hueBridges = data;
+    });
+
+    $scope.$on('socket:wemo-found', function (ev, data) {
+      console.log('Wemo Device Discovered ' + JSON.stringify(data));
+
+      if (typeof $scope.wemo !== 'undefined' && 
+          typeof $scope.wemo.devices !== 'undefined') {
+        for (var i = 0; i < $scope.wemo.devices.length; i++) {
+          if ($scope.wemo.devices[i].ip === data.ip) {
+            console.log('Wemo Already Found');
+            $scope.discoverWemoDevicesDisabled = false;
+            return;
+          }
+        }
+
+        $scope.wemo.devices.push(data);
+        $scope.$digest();
+      } else {
+        $scope.wemo = {
+          devices: []
+        };
+        $scope.wemo.devices.push(data);
+        $scope.$digest();
+      }
+
+      $scope.discoverWemoDevicesDisabled = false;
     });
 
     $scope.discoverHueBridges = function() {
@@ -55,9 +83,12 @@ angular.module('interDromeApp')
 					socket: function () {
 						return idSocket;
 					},
-					bridge: function() {
+					selectedBridge: function() {
 						return b;
-					}
+					},
+          HueBridge: function() {
+            return HueBridge;
+          }
 				}
 			});
 		}
@@ -66,7 +97,43 @@ angular.module('interDromeApp')
 		}, function () {
 			$log.info('Modal dismissed at: ' + new Date());
 		});
-	};
+  }
+
+  $scope.openWemoDeviceModal = function (wd) {
+    modalInstance = $modal.open({
+      templateUrl: 'wemo-device-content',
+      controller: WemoDeviceModalInstanceCtrl,
+      resolve: {
+        socket: function () {
+          return idSocket;
+        },
+        wemoDevice: function() {
+          return wd;
+        }
+      }
+    });
+    
+    modalInstance.result.then(function () {
+    }, function () {
+      $log.info('Modal dismissed at: ' + new Date());
+    });
+  }
+
+  $scope.discoverWemoDevices = function() {
+    console.log('Discovering Wemo Devices');
+    $scope.discoverWemoDevicesDisabled = true;
+    idSocket.emit('wemo', {action:'discovery'}, function() {
+      console.log('emit callback');
+    });
+
+    setTimeout(function() {
+      if ($scope.discoverWemoDevicesDisabled) {
+        console.log('Re-enabling Wemo Device Search');
+        $scope.discoverWemoDevicesDisabled = false;
+        $scope.$digest();
+      }
+    }, 10000);
+  }
 
 });
 
@@ -109,12 +176,13 @@ var HueBridgeRegisterModalInstanceCtrl = function ($scope, $modalInstance, socke
   	};
 };
 
-var HueBridgeLightsModalInstanceCtrl = function ($scope, $modalInstance, socket, bridge) {
+var HueBridgeLightsModalInstanceCtrl = function ($scope, $modalInstance, socket, selectedBridge, HueBridge) {
 
-	$scope.bridge = bridge;
-  	$scope.alerts = [];
+	$scope.bridge = selectedBridge;
+  $scope.alerts = [];
+  $scope.hueBridgeName;
 
-  	socket.emit('hue', {action:'getLights', bridge: bridge}, function() {
+  	socket.emit('hue', {action:'getLights', bridge: selectedBridge}, function() {
   		console.log('emit callback');
   	});
 
@@ -133,6 +201,15 @@ var HueBridgeLightsModalInstanceCtrl = function ($scope, $modalInstance, socket,
   			console.log('Hue Bridge Lights Response ' + JSON.stringify(data));
   		}
   	});
+
+    $scope.setHueBridgeName = function(keyCode) {
+      if (keyCode == 13) {
+        HueBridge.update({
+          id: $scope.bridge._id, 
+          name: $scope.bridge.name
+        });
+      }
+    }
 
   	$scope.closeAlert = function(index) {
     	$scope.alerts.splice(index, 1);
@@ -155,4 +232,40 @@ var HueBridgeLightsModalInstanceCtrl = function ($scope, $modalInstance, socket,
   	$scope.cancel = function () {
     	$modalInstance.dismiss('cancel');
   	};
+};
+
+
+var WemoDeviceModalInstanceCtrl = function ($scope, $modalInstance, socket, wemoDevice) {
+
+    $scope.alerts = [];
+    $scope.wemoDevice = wemoDevice;
+
+    $scope.$on('socket:wemo-set-binary-state-result', function (ev, data) {
+      console.log(JSON.stringify(data));
+      if (data.err) {
+        $scope.alerts.push({ type: 'danger', msg: 'Error: ' + data.err.code.capitalize() });
+      }
+    });
+    
+    $scope.closeAlert = function(index) {
+      $scope.alerts.splice(index, 1);
+    };
+
+    $scope.turnOn = function (lights) {
+      $scope.alerts = [];
+      socket.emit('wemo', {action:'on', wemoDevice: wemoDevice}, function() {
+        console.log('emit callback');
+      });
+    };
+
+    $scope.turnOff = function (lights) {
+      $scope.alerts = [];
+      socket.emit('wemo', {action:'off', wemoDevice: wemoDevice}, function() {
+        console.log('emit callback');
+      });
+    };
+
+    $scope.cancel = function () {
+      $modalInstance.dismiss('cancel');
+    };
 };

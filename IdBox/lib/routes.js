@@ -5,7 +5,9 @@ var api = require('./controllers/api'),
     users = require('./controllers/users'),
     session = require('./controllers/session'),
     hue = require('./controllers/hue'),
-    bleep = require('./controllers/bleep');
+    bleep = require('./controllers/bleep'),
+    beacon = require('./controllers/beacon'),
+    wemo = require('./controllers/wemo');
 
 var middleware = require('./middleware');
 
@@ -27,8 +29,15 @@ module.exports = function(app) {
 
   app.get('/api/hue/bridges/test', hue.test);
   app.get('/api/hue/bridges', hue.bridges);
+  app.put('/api/hue/bridges', hue.update);
+
+  app.get('/api/wemos', wemo.all);
 
   app.get('/api/bleeps', bleep.all);
+  app.put('/api/bleeps', bleep.update);
+
+  app.get('/api/beacons', beacon.all);
+  app.put('/api/beacons', beacon.update);
 
   // All undefined api routes should return a 404
   app.get('/api/*', function(req, res) {

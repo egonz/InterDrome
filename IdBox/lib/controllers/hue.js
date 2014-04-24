@@ -35,8 +35,23 @@ exports.bridges = function (req, res, next) {
       .populate('user')
       .exec(function (err, bridges) {
     if (err) return next(err);
-    if (!HueBridge) return res.send(404);
+    if (!bridges) return res.send(404);
 
     res.send({ bridges: bridges });
+  });
+};
+
+exports.update = function (req, res, next) {
+  var id = req.body.id;
+  var name = String(req.body.name);
+
+  HueBridge.findById(id, function (err, bridge) {
+    bridge.name = name;
+    bridge.updated = Date.now();
+    bridge.save(function(err) {
+      if (err) return res.send(400);
+
+      res.send(200);
+    });
   });
 };

@@ -9,14 +9,14 @@ angular.module('interDromeApp')
       'title': "Inter.'.Zones",
       'link': '/interzone'
     }, {
-      'title': 'Controls',
-      'link': '/controls'
-    }, {
       'title': 'Bleeps',
       'link': '/bleeps'
     }, {
       'title': 'Events',
       'link': '/events'
+    }, {
+      'title': 'Controls',
+      'link': '/controls'
     }, {
       'title': 'Notifications',
       'link': '/notifications'

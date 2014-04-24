@@ -2,17 +2,39 @@ var WeMo = new require('wemo'),
 	mongoose = require('mongoose'),
     WemoDevice = mongoose.model('WemoDevice');
 
-module.exports = function(lcd) {
+module.exports = function(lcd, socket) {
 
 	var ON = 1, OFF = 0;
 	var _wemoClient; 
 	var _wemoDevices = {};
 	var _firstDeviceFound = true;
 
-	_wemoClient = WeMo.Search();
-	_wemoClient.on('found', function(device) {
-		_addWemoDevice(device);				
+
+	socket.addListener(function(ioclient) {
+		ioclient.on('wemo', function(data) {
+			console.log('Wemo Socket Action ' + data.action);
+
+			if (data.action === 'discovery') {
+				_discover();
+			} else if (data.action === 'on') {
+				_setBinaryState(data.wemoDevice, ON, function(err) {
+					ioclient.emit('wemo-set-binary-state-result', {err: err});
+				});
+			} else if (data.action === 'off') {
+				_setBinaryState(data.wemoDevice, OFF, function(err) {
+					ioclient.emit('wemo-set-binary-state-result', {err: err});
+				});
+			}
+		});
 	});
+
+	function _discover() {
+		_wemoClient = WeMo.Search();
+		_wemoClient.on('found', function(device) {
+			_addWemoDevice(device);
+			socket.emit('wemo-found', device);		
+		});
+	}
 
 	function _saveWemoDevice(device) {
 		WemoDevice.findOne({ friendlyName: device.friendlyName }, 
@@ -78,7 +100,8 @@ module.exports = function(lcd) {
 	}
 
 	function _setBinaryState(device, state, callback) {
-		console.log('Setting Device %s to binary state %d ', device.friendlyName, state);
+		console.log('Setting Device %s (%s:%d) to binary state %d ', 
+			device.friendlyName, device.ip, device.port, state);
 
     	var wemoDevice = new WeMo(device.ip, device.port);
       	wemoDevice.setBinaryState(state, function(err, result) {
@@ -102,6 +125,8 @@ module.exports = function(lcd) {
       		}, 2000);
     	});
   	}
+
+  	_discover();
 
 	return {
 		getDevices: function() {

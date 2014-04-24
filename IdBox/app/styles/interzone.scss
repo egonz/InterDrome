@@ -6,7 +6,10 @@ $interzone-map-height: 400px;
 	height: $interzone-map-height; 
 }
 
-#interzone-addr-input { width: 400px; }
+#interzone-addr-input { 
+	width: 400px;
+	color: black; 
+}
 
 #interzone-map { position: absolute; }
 
