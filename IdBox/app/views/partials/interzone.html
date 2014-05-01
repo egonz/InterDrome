@@ -1,29 +1,118 @@
 <div ng-include="'partials/navbar'"></div>
 
-<div class="row">
-	<input id="interzone-addr-input" type="text" ng-autocomplete ng-model="autocomplete" options="options" details="details"/>
-	<button type="button" class="btn btn-default btn-sm">
-  		<span class="glyphicon glyphicon-map-marker"></span> Map It
-	</button>
+<div id="interzones" class="row">
+	<div class="well col-md-12">
+		<div class="col-md-4">
+			<select id="interzones-select" class="form-control" ng-model="interZone" ng-change="interZoneSelected()" ng-options="interzone.name for interzone in interZoneData.interZones">
+			</select>
+		</div> 
+
+		<div class="col-md-4">
+			<span class="space-md-1">Or</span>
+			<button type="button" class="btn btn-primary" ng-click="createInterZone()" ng-disabled="newInterZone">
+		  		<span class="glyphicon glyphicon-plus"></span> New
+			</button>
+		</div>
+	</div>
 </div>
 
-<span ng-if="details.geometry.location">
-	<div class="row">
-		<button type="button" class="btn btn-default btn-sm" ng-click="editFloorPlan()" ng-hide="showFloorPlan">
-	  		<span class="glyphicon glyphicon-edit"></span> Edit Floor Plan
-		</button>
+<div id="interzone-loc" class="row" ng-show="newInterZone">
+	<div class="col-lg-6">
+    	<div class="input-group">
+    		<input id="interzone-addr-input" type="text" ng-autocomplete ng-model="autocomplete" options="options" details="details" class="form-control"/>
+    		<span class="input-group-btn">
+        		<button type="button" class="btn btn-success">
+					<span class="glyphicon glyphicon-map-marker"></span> Map It
+				</button>
+      		</span>
+      	</div>
+  	</div>
 
-		<button type="button" class="btn btn-default btn-sm" ng-click="saveFloorPlan()" ng-show="showFloorPlan">
-	  		<span class="glyphicon glyphicon-edit"></span> Save Floor Plan
-		</button>
+  	<div class="col-lg-5">
+		<alert ng-show="alert" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
 	</div>
-	<div class="row">
-		lat: {{details.geometry.location.k}} lon: {{details.geometry.location.A}}
+</div>
+
+<div ng-if="interZoneEditInfo && interZone.loc">
+	<div id="interzone-name" class="row">
+		<div class="col-lg-6">
+			<h4>
+				<a href="#" editable-text="interZone.name" onbeforesave="checkName($data)">
+				{{ interZone.name || 'Enter InterZone Name' }}
+				</a>
+			</h4>
+		</div>
+	</div>
+	<div id="interzone-editor-buttons" class="row">
+		<div class="col-lg-6">
+			<button type="submit" class="btn btn-default btn-sm interzone-editor-button" ng-click="saveInterZone()" ng-disabled="!interZoneEdit">
+		  		<span class="glyphicon glyphicon-save"></span> Save
+			</button>
+
+			<button type="button" class="btn btn-default btn-sm interzone-editor-button" ng-click="editInterZone()" ng-hide="interZoneEdit">
+		  		<span class="glyphicon glyphicon-edit"></span> Edit
+			</button>
+
+			<button type="button" class="btn btn-default btn-sm interzone-editor-button" ng-click="clearInterZone()" ng-show="interZoneEdit">
+		  		<span class="fa fa-undo"></span> Undo
+			</button>
+
+			<button type="button" class="btn btn-default btn-sm interzone-editor-button" ng-click="showMap=true" ng-show="interZoneEdit && !showMap">
+		  		<span class="icomoon icon-map"></span> Show Map
+			</button>
+
+			<button type="button" class="btn btn-default btn-sm interzone-editor-button" ng-click="showMap=false" ng-show="interZoneEdit && showMap">
+		  		<span class="icomoon icon-map-2"></span> Hide Map
+			</button>
+
+			<button type="button" class="btn btn-default btn-sm interzone-editor-button" ng-click="cancelEdit()" ng-show="interZoneEdit && showMap">
+		  		<span class="icomoon icon-cancel-circle"></span> Cancel
+			</button>
+		</div>
+		<div class="col-lg-3 interzone-latlon">
+			<span class="interzone-info-label">lat: </span>
+			<span class="interzone-info">{{interZone.loc.latitude}}</span>
+		</div> 
+		<div class="col-lg-3 interzone-latlon">
+			<span class="interzone-info-label">lon: </span>
+			<span class="interzone-info">{{interZone.loc.longitude}}</span>
+		</div>
+	</div>
+	<div class="row" ng-show="interZoneView">
+		<div class="col-lg-8">
+			<span class="interzone-info-label">angle:</span> 
+			<span class="interzone-info">{{angle}}</span>
+			<span class="interzone-info-label">pan:</span>
+			<span class="interzone-info">{{pan}}</span> 
+			<span class="interzone-info-label">zoom:</span>
+			<span class="interzone-info">{{zoom}}</span>
+		</div>
+	</div>
+	<div class="row" ng-show="debug">
+		<div class="col-lg-8">
+			<span class="interzone-info-label">showMap:</span> 
+			<span class="interzone-info">{{showMap}}</span>
+			<span class="interzone-info-label">interZoneView:</span> 
+			<span class="interzone-info">{{interZoneView}}</span>
+		</div>
 	</div>
 	<div class="row">	
-		<google-map id="interzone-map" center="{latitude: details.geometry.location.k, longitude: details.geometry.location.A}" zoom="map.zoom" draggable="true" dragging-cursor="hand" options="map.options">
+		<google-map id="interzone-map" center="interZone.loc" zoom="map.zoom" draggable="true" dragging-cursor="hand" options="map.options" ng-show="showMap" control="mapControl">
 		</google-map>
+		<interzone-editor width="interZoneWidth" height="interZoneHeight" 
+			points="interZone.points" class="row" ng-show="interZoneEdit" control="interZoneEditorControl">
+		</interzone-editor>
 	</div>
-	<div id="floorplan" class="row" ng-show="showFloorPlan">
+	<div id="interzone-view" class="row" ng-show="interZoneView">	
+		<interzone-drag-zoom width="interZoneWidth" height="interZoneHeight" 
+		points="interZonePoints" angle="angle" pan="pan" zoom="zoom" control="interZoneControl"></interzone-drag-zoom>
 	</div>
-</span>
+	<div class="rotate-slider" ng-show="interZoneView">
+		<bootstrap-slider model="angle" type="text" value="" data-slider-min="0" data-slider-max="360" data-slider-step="1" bootstrap-slider-value="{{angle}}" data-slider-orientation="vertical" data-slider-selection="after" data-slider-tooltip="show" handle="square"></bootstrap-slider>
+	</div>
+	<div id="interzone-debug" class="row">
+		<div ng-show="interZoneEdit">
+			{{interZone.points}}
+		</div>
+	<div>
+</div>

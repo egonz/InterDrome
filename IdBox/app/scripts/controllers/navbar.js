@@ -3,9 +3,6 @@
 angular.module('interDromeApp')
   .controller('NavbarCtrl', function ($scope, $location, Auth) {
     $scope.menu = [{
-      'title': 'Home',
-      'link': '/'
-    }, {
       'title': "Inter.'.Zones",
       'link': '/interzone'
     }, {

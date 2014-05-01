@@ -8,7 +8,8 @@ angular.module('interDromeApp', [
   'google-maps',
   'ngAutocomplete',
   'btford.socket-io',
-  'ui.bootstrap'
+  'ui.bootstrap',
+  'xeditable'
 ])
   .factory('idSocket', function (socketFactory) {
     console.log('Creating Socket.io connection factory');
@@ -30,8 +31,8 @@ angular.module('interDromeApp', [
   .config(function ($routeProvider, $locationProvider, $httpProvider) {
     $routeProvider
       .when('/', {
-        templateUrl: 'partials/main',
-        controller: 'MainCtrl',
+        templateUrl: 'partials/interzone',
+        controller: 'InterZoneCtrl',
         authenticate: true
       })
       .when('/login', {
@@ -73,7 +74,7 @@ angular.module('interDromeApp', [
         authenticate: true
       })
       .otherwise({
-        redirectTo: '/'
+        redirectTo: '/interzone'
       });
       
     $locationProvider.html5Mode(true);
@@ -93,8 +94,9 @@ angular.module('interDromeApp', [
       };
     }]);
   })
-  .run(function ($rootScope, $location, Auth) {
-
+  .run(function ($rootScope, $location, Auth, editableOptions) {
+    
+    editableOptions.theme = 'bs3';
     // Redirect to login if route requires auth and you're not logged in
     $rootScope.$on('$routeChangeStart', function (event, next) {
       

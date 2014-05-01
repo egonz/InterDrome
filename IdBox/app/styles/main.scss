@@ -8,6 +8,8 @@ $icon-font-path: "/bower_components/bootstrap-sass-official/vendor/assets/fonts/
 @import 'interzone';
 @import 'control';
 @import 'bleep';
+@import 'notification';
+@import 'floor-plan';
 
 .browsehappy {
     margin: 0.2em 0;
@@ -104,4 +106,19 @@ body {
     .jumbotron {
         border-bottom: 0;
     }
+}
+
+/* Color Overrides. Change if using a different Theme. */
+
+select {
+    color: black !important;
+}
+
+a.editable-click {
+    color: white !important;
+}
+
+a.editable-empty {
+    font-weight: bold !important;
+    color: #df691a !important;
 }

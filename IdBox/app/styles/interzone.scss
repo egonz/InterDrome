@@ -1,24 +1,103 @@
-$interzone-map-width: 640px;
-$interzone-map-height: 400px;
+$interzone-map-width: 1024px;
+$interzone-map-height: 468px;
+$interzone-form-field-length: 400px;
 
 .angular-google-map-container { 
 	width: $interzone-map-width; 
 	height: $interzone-map-height; 
 }
 
+.space-md-1 {
+	margin-right: 30px;
+}
+
+#interzones-select {
+	width: 300px;
+}
+
+#interzone-loc {
+	margin-top: 10px;
+}
+
 #interzone-addr-input { 
-	width: 400px;
-	color: black; 
+	width: $interzone-form-field-length;
+	color: black;
+}
+
+#interzone-name {
+	margin-bottom: 10px;
+}
+
+#interzone-name input {
+	width: $interzone-form-field-length;
+	color: black;
 }
 
 #interzone-map { position: absolute; }
 
-#floorplan { 
-	position: relative; 
-	width: $interzone-map-width - 20; 
-	height: $interzone-map-height - 20;
+interzone-editor { 
+	position: absolute; 
+	width: $interzone-map-width; 
+	height: $interzone-map-height;
 	color: white;
 	font-weight: bold;
-	border: 3px dashed red;
 	z-index: 999;
+	border: 2px gray dashed;
+}
+
+/*#floor-plan-bg { 
+	position: absolute; 
+	width: $interzone-map-width; 
+	height: $interzone-map-height;
+	bg-color: white;
+	font-weight: bold;
+	z-index: -999;
+}*/
+
+div.row interzone-editor { 
+	margin-left: 0px;
+	margin-right: 0px;
+}
+
+#interzone-editor-buttons {
+	margin-top: 20px;
+	margin-bottom: 10px;
+}
+
+.interzone-editor-button {
+	margin-right: 10px;
+}
+
+#interzone-debug {
+	position:absolute; 
+	top: 870px;
+}
+
+.interzone-latlon {
+	margin-top: 5px;
+}
+
+#zone-loc .alert {
+	margin-bottom: 0px !important;
+	margin-top: -6px !important;
+}
+
+.rotate-slider div.slider {
+	margin-left: 25px;
+	height: 333px;
+	margin-top: -495px;
+}
+
+.interzone-info-label {
+	font-weight:bold;
+	font-size: 9pt;
+}
+
+.interzone-info {
+	font-size: 9pt;
+	margin-right: 10px;
+}
+
+#interzone-view {
+	border: 1px solid darkgrey;
 }

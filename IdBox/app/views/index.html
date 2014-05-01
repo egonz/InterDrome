@@ -13,12 +13,17 @@
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     <!-- build:css(app) styles/vendor.css -->
     <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/angular-xeditable/dist/css/xeditable.css" />
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="bower_components/seiyria-bootstrap-slider/dist/css/bootstrap-slider.css" />
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css({.tmp,app}) styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/bootswatch/3.1.1/superhero/bootstrap.min.css" rel="stylesheet">
+
+    <link href="bower_components/icomoon/style.css" rel="stylesheet">
     <!-- endbuild -->
   </head>
   <body ng-app="interDromeApp">
@@ -47,6 +52,7 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script src='//maps.googleapis.com/maps/api/js?libraries=places&sensor=false'></script>
+    <script src='//cdn.jsdelivr.net/snap.svg/0.1.0/snap.svg-min.js'></script>
 
     <!-- build:js(app) scripts/vendor.js -->
     <!-- bower:js -->
@@ -64,6 +70,10 @@
     <script src="bower_components/ngAutocomplete/src/ngAutocomplete.js"></script>
     <script src="bower_components/angular-socket-io/socket.js"></script>
     <script src="bower_components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.js"></script>
+    <script src="bower_components/angular-ui-utils/ui-utils.js"></script>
+    <script src="bower_components/angular-xeditable/dist/js/xeditable.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/seiyria-bootstrap-slider/js/bootstrap-slider.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
@@ -86,8 +96,15 @@
         <script src="scripts/services/bleep.js"></script>
         <script src="scripts/services/wemo.js"></script>
         <script src="scripts/services/beacon.js"></script>
+        <script src="scripts/services/notification.js"></script>
+        <script src="scripts/services/interzone.js"></script>
         <script src="scripts/directives/mongooseError.js"></script>
         <script src="scripts/directives/anchor_links.js"></script>
+        <script src="scripts/directives/donut-chart.js"></script>
+        <script src="scripts/directives/interzone-editor.js"></script>
+        <script src="scripts/directives/interzone.js"></script>
+        <script src="scripts/directives/interzone-drag-zoom.js"></script>
+        <script src="scripts/directives/bootstrap-slider.js"></script>
         <!-- endbuild -->
 </body>
 </html>

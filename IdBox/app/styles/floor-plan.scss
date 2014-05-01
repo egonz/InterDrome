@@ -1,0 +1,55 @@
+/* TODO Rename This File */
+
+rect {
+  fill: none;
+  pointer-events: all;
+}
+
+circle,
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2.5px;
+}
+
+#interdrome-floor-plan path {
+  fill: #df691a;
+  fill-opacity:0.18;
+  stroke-opacity: 1;
+}
+
+.interzone-line {
+  fill: none;
+  stroke: white;
+  stroke-width: 2.5px;
+}
+
+circle {
+  fill: #fff;
+  fill-opacity: .2;
+  cursor: move;
+}
+
+.selected {
+  fill: #ff7f0e;
+  stroke: #ff7f0e;
+}
+
+.dot circle {
+  fill: lightsteelblue;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.dot circle.dragging {
+  fill: red;
+  stroke: brown;
+}
+
+.axis line {
+  fill: none;
+  stroke: #ddd;
+  shape-rendering: crispEdges;
+  vector-effect: non-scaling-stroke;
+  opacity:0.18;
+}

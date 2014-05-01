@@ -25,7 +25,7 @@
           <p class="help-block" ng-show="form.email.$error.required && form.password.$error.required && submitted">
              Please enter your email and password.
           </p>              
-          <p class="help-block">{{ errors.other }}</p>
+          <p id="login-error" class="help-block">{{ errors.other }}</p>
         </div>
 
         <button type="submit" class="btn btn-lg btn-primary"> Sign in </button>

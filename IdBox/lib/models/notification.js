@@ -7,7 +7,9 @@ var mongoose = require('mongoose'),
  * Bleep Schema
  */
 var NotificationSchema = new Schema({
+  name: String,
   pushover_user: String,
+  email: String,
   created: Date,
   updated: Date
 });
