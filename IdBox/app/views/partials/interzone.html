@@ -1,5 +1,7 @@
 <div ng-include="'partials/navbar'"></div>
 
+<div id="bootstrap-growl"></div>
+
 <div id="interzones" class="row">
 	<div class="well col-md-12">
 		<div class="col-md-4">
@@ -7,10 +9,17 @@
 			</select>
 		</div> 
 
-		<div class="col-md-4">
+		<div class="col-md-2">
 			<span class="space-md-1">Or</span>
 			<button type="button" class="btn btn-primary" ng-click="createInterZone()" ng-disabled="newInterZone">
 		  		<span class="glyphicon glyphicon-plus"></span> New
+			</button>
+		</div>
+
+		<div class="col-md-4">
+			<span class="space-md-1">Or</span>
+			<button type="button" class="btn btn-success" ng-click="selectDefaultZone()">
+		  		<span class="fa fa-star"></span> Default
 			</button>
 		</div>
 	</div>
@@ -27,10 +36,6 @@
       		</span>
       	</div>
   	</div>
-
-  	<div class="col-lg-5">
-		<alert ng-show="alert" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
-	</div>
 </div>
 
 <div ng-if="interZoneEditInfo && interZone.loc">
@@ -45,7 +50,7 @@
 	</div>
 	<div id="interzone-editor-buttons" class="row">
 		<div class="col-lg-6">
-			<button type="submit" class="btn btn-default btn-sm interzone-editor-button" ng-click="saveInterZone()" ng-disabled="!interZoneEdit">
+			<button type="submit" class="btn btn-default btn-sm interzone-editor-button" ng-click="saveInterZone()">
 		  		<span class="glyphicon glyphicon-save"></span> Save
 			</button>
 
@@ -69,31 +74,30 @@
 		  		<span class="icomoon icon-cancel-circle"></span> Cancel
 			</button>
 		</div>
-		<div class="col-lg-3 interzone-latlon">
-			<span class="interzone-info-label">lat: </span>
-			<span class="interzone-info">{{interZone.loc.latitude}}</span>
-		</div> 
-		<div class="col-lg-3 interzone-latlon">
-			<span class="interzone-info-label">lon: </span>
-			<span class="interzone-info">{{interZone.loc.longitude}}</span>
-		</div>
 	</div>
 	<div class="row" ng-show="interZoneView">
-		<div class="col-lg-8">
+		<div class="col-lg-12">
+			<span class="interzone-info-label">lat: </span>
+			<span class="interzone-info">{{interZone.loc.latitude}}</span>
+			<span class="interzone-info-label">lon: </span>
+			<span class="interzone-info">{{interZone.loc.longitude}}</span>
 			<span class="interzone-info-label">angle:</span> 
-			<span class="interzone-info">{{angle}}</span>
+			<span class="interzone-info">{{interZone.angle}}</span>
 			<span class="interzone-info-label">pan:</span>
-			<span class="interzone-info">{{pan}}</span> 
+			<span class="interzone-info">{{interZone.pan}}</span> 
 			<span class="interzone-info-label">zoom:</span>
-			<span class="interzone-info">{{zoom}}</span>
+			<span class="interzone-info">{{interZone.zoom}}</span>
 		</div>
 	</div>
 	<div class="row" ng-show="debug">
 		<div class="col-lg-8">
+			<span class="interzone-info">Debug:</span> 
 			<span class="interzone-info-label">showMap:</span> 
 			<span class="interzone-info">{{showMap}}</span>
 			<span class="interzone-info-label">interZoneView:</span> 
 			<span class="interzone-info">{{interZoneView}}</span>
+			<span class="interzone-info-label">interZone.dirty:</span> 
+			<span class="interzone-info">{{interZone.dirty}}</span>
 		</div>
 	</div>
 	<div class="row">	
@@ -105,10 +109,10 @@
 	</div>
 	<div id="interzone-view" class="row" ng-show="interZoneView">	
 		<interzone-drag-zoom width="interZoneWidth" height="interZoneHeight" 
-		points="interZonePoints" angle="angle" pan="pan" zoom="zoom" control="interZoneControl"></interzone-drag-zoom>
+		points="interZonePoints" angle="interZone.angle" pan="interZone.pan" zoom="interZone.zoom" control="interZoneControl"></interzone-drag-zoom>
 	</div>
 	<div class="rotate-slider" ng-show="interZoneView">
-		<bootstrap-slider model="angle" type="text" value="" data-slider-min="0" data-slider-max="360" data-slider-step="1" bootstrap-slider-value="{{angle}}" data-slider-orientation="vertical" data-slider-selection="after" data-slider-tooltip="show" handle="square"></bootstrap-slider>
+		<bootstrap-slider model="interZone.angle" type="text" value="" data-slider-min="0" data-slider-max="360" data-slider-step="1" bootstrap-slider-value="{{angle}}" data-slider-orientation="vertical" data-slider-selection="after" data-slider-tooltip="show" handle="square"></bootstrap-slider>
 	</div>
 	<div id="interzone-debug" class="row">
 		<div ng-show="interZoneEdit">

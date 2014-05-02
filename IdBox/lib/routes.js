@@ -46,7 +46,7 @@ module.exports = function(app) {
   app.get('/api/notifications', notification.all);
 
   app.post('/api/interzones', interzone.create);
-  app.put('/api/interzones', interzone.update);
+  app.put('/api/interzones/:id', interzone.update);
   app.get('/api/interzones', interzone.all);
   app.get('/api/interzones/:id', interzone.show);
 

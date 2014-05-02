@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $rootScope, $http, 
-        idSocket, InterZone) {
+        idSocket, InterZone, BootstrapGrowl) {
     
     $scope.debug = true;
     $scope.width = 1024;
@@ -15,7 +15,6 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
     $scope.interZoneControl = {};
     $scope.interZoneEditorControl = {};
     $scope.mapControl = {};
-    $scope.alert;
     $scope.interZonePoints;
 
     $scope.lastView = {
@@ -23,9 +22,9 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
         selectedView: false
     };
 
-    $scope.angle = 316;
-    $scope.pan = [-312.0016234354316,-115.4506741956165];
-    $scope.zoom = 1.584514132467325;
+    $scope.angle;
+    $scope.pan;
+    $scope.zoom;
 
     var mapOptions = {
         panControl    : true,
@@ -41,6 +40,8 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
         options: mapOptions
     };
 
+    var bootstrapGrowlOptions = {ele: '#bootstrap-growl'};
+
     //Listen for Google Places data
     $scope.$watch("details.geometry", function () {
         if (typeof $scope.details !== 'undefined') {
@@ -53,6 +54,27 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
         }
     }, true);
 
+    $scope.$watch("interZone.angle", function (newValue, oldValue) {
+        if (oldValue !== -1) {
+            $scope.interZone.dirty = true;
+        }
+    });
+    $scope.$watch("interZone.points", function (newValue, oldValue) {
+        if (oldValue.length !== 0) {
+            $scope.interZone.dirty = true;
+        }
+    });
+    $scope.$watch("interZone.pan", function (newValue, oldValue) {
+        if (oldValue !== -1) {
+            $scope.interZone.dirty = true;
+        }
+    });
+    $scope.$watch("interZone.zoom", function (newValue, oldValue) {
+        if (oldValue !== -1) {
+            $scope.interZone.dirty = true;
+        }
+    });
+
     function newInterZoneInstance() {
         $scope.interZone = {
             name: "",
@@ -60,14 +82,37 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
                 latitude: 37.7749295,
                 longitude: -122.41941550000001
             },
-            points: []
+            points: [],
+            angle: -1,
+            pan: -1,
+            zoom: -1,
+            default_zone: false,
+            dirty: false,
+            newInstance: true
         };
     }
 
-    function loadInterZones() {
+    function loadInterZones(selectedName) {
+        console.log('Loading InterZones. Selecting Name: ' + selectedName);
         var izData = InterZone.get(function(izData) {
             izData.interZones.unshift({_id:"", name:""});
             $scope.interZoneData = izData;
+
+            if (typeof selectedName !== 'undefined') {
+                for (var i = 0; i < $scope.interZoneData.interZones.length; i++) {
+                    if ($scope.interZoneData.interZones[i].name == selectedName) {
+                        $scope.interZone = $scope.interZoneData.interZones[i];
+                        if ($scope.interZoneControl.reset !== 'undefined') {
+                            try {
+                                $scope.interZoneControl.reset($scope.interZone.points);
+                            } catch (e) {}
+                        }
+                        return;
+                    }
+                }
+            }
+
+            // $scope.interZoneDataClean = JSON.parse(JSON.stringify(bleep))
         });
     }
 
@@ -78,18 +123,21 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
         $scope.interZoneEditInfo = false;
         $scope.newInterZone = false;
         $scope.showMap = false;
-        $scope.alert = undefined;
 
         $scope.autocomplete = undefined;
     }
 
-    function createDangerAlert(msg) {
-        $scope.alert = { type: 'danger', msg: msg};
-    }
-
     function saveComplete() {
-        $scope.alert = { type: 'success', msg: 'InterZone Floor Plan Created'};
-        init();
+        BootstrapGrowl.success('InterZone Saved', bootstrapGrowlOptions);
+        
+        console.log(JSON.stringify($scope.interZone));
+
+        loadInterZones($scope.interZone.name);
+        
+        $scope.interZone.dirty = false;
+        $scope.interZoneEditInfo = true;
+        $scope.interZoneView = true;
+        $scope.newInterZone = false;
     }
 
     $scope.createInterZone = function() {
@@ -101,7 +149,6 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
         $scope.interZoneEditInfo = false;
         $scope.interZoneView = false;
         $scope.showMap = false;
-        $scope.alert = undefined;
         $scope.autocomplete = undefined;
         $scope.details = undefined;
 
@@ -135,6 +182,8 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
                 $scope.interZoneEditorControl.reset($scope.interZone.points);
             } catch (e) {}
         }
+
+        $scope.interZone.dirty = false;
     }
 
 	$scope.editInterZone = function() {
@@ -144,6 +193,7 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
         
         var mapRefreshTimeout = setTimeout(function() {
             $scope.mapControl.refresh($scope.interZone.loc);
+            $scope.map.zoom = 24;
         }, 100);
 	}
 
@@ -161,9 +211,9 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
 
 	$scope.saveInterZone = function() {
         if ($scope.interZone.name.length === 0) {
-            createDangerAlert('Error: InterZone Name Required.');
+            BootstrapGrowl.error('Error: InterZone Name Required.', bootstrapGrowlOptions);
         } else if ($scope.interZone.points.length === 0) {
-            createDangerAlert('Error: InterZone Floor Plan Required.');
+            BootstrapGrowl.error('Error: InterZone Floor Plan Required.', bootstrapGrowlOptions);
         } else {
             $scope.showMap = false;
             $scope.interZoneEdit = false;
@@ -172,10 +222,17 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
                 var interZone = InterZone.get({id:$scope.interZone._id}, function(interZone) {
                     console.log('InterZone found with id ' + interZone._id);
                     interZone.name = $scope.interZone.name;
+                    interZone.angle = $scope.interZone.angle;
+                    interZone.pan = $scope.interZone.pan;
+                    interZone.zoom = $scope.interZone.zoom;
+                    interZone.default_zone = $scope.interZone.default_zone;
                     interZone.points = $scope.interZone.points;
-                    interZone.$update(function(data) {
+
+                    console.log('Updating InterZone to: ' + JSON.stringify(interZone));
+
+                    interZone.$update({ id:interZone._id }, function(data) {
                         console.log("saveInterZone update callback");
-                        init();
+                        saveComplete();
                     });
                 }, function(err) {
                     saveNewInterZoneInstance();
@@ -189,12 +246,16 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
     function saveNewInterZoneInstance() {
         console.log('InterZone not found. Creating new Zone.');
         
+        $scope.interZone.angle = 0;
+        $scope.interZone.pan = [0,0];
+        $scope.interZone.zoom = 1;
+
         InterZone.save($scope.interZone, function(data, headers) {
             console.log("saveInterZone save callback");
-            $scope.interZone = data;
+            // $scope.interZone = data;
             saveComplete();
         }, function(data,headers) {
-            createDangerAlert('Error saving InterZone; ' + data);             
+            BootstrapGrowl.error('Error saving InterZone; ' + data, bootstrapGrowlOptions);             
         });
     }
 
@@ -209,10 +270,6 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
     $scope.checkName = function(data) {
         console.log('Checking name ' + data);
     }
-
-    $scope.closeAlert = function(index) {
-        $scope.alert = undefined;
-    };
 
     init();
 });

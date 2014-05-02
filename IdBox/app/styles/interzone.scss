@@ -101,3 +101,10 @@ div.row interzone-editor {
 #interzone-view {
 	border: 1px solid darkgrey;
 }
+
+#bootstrap-growl {
+	position: absolute;
+	top: 190px;
+	z-index: 999;
+	right: 150px;
+}

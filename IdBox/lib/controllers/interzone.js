@@ -25,24 +25,36 @@ exports.create = function (req, res, next) {
 };
 
 exports.update = function (req, res, next) {
+  console.log('Updating InterZone ');
+
   var id = req.params.id;
-  var name = String(req.body.name);
-  var loc = String(req.body.loc);
-  var points = String(req.body.points);
-  var bleep_zones = String(req.body.bleep_zones);
-
+  
   console.log('Updating ID ' + id);
-
+  
   InterZone.findById(id, function (err, interZone) {
-    interZone.name = name;
-    interZone.loc = loc;
-    interZone.points = points;
-    interZone.bleep_zones = bleep_zones;
+    if (err) res.send(404);
+    if (!interZone) {
+      console.log('InterZone not found for id %d', id);
+      return res.send(404);
+    }
+
+    interZone.name = req.body.name;
+    interZone.loc = req.body.loc;
+    interZone.points = req.body.points;
+    interZone.angle = Number(req.body.angle);
+    interZone.pan = req.body.pan;
+    interZone.zoom = Number(req.body.zoom);
+    interZone.default_zone = Boolean(req.body.default_zone);
+
+    // if (typeof req.body.bleep_zones !== 'undefined' && req.body.bleep_zones)
+      
     interZone.updated = Date.now();
     
     interZone.save(function(err) {
-      if (err) return res.send(400);
-
+      if (err) {
+        console.log(JSON.stringify(err));
+        return res.send(400);
+      }
       res.send(200);
     });
   });
@@ -51,12 +63,10 @@ exports.update = function (req, res, next) {
 exports.show = function (req, res, next) {
   var id = req.params.id;
 
-  //{loc: {latitude:parseFloat(latitude),longitude:parseFloat(longitude)}}
-
   InterZone.findById(id, function (err, interZone) {
     if (err) res.send(404);
     if (!interZone) {
-      console.log('InterZone not found for lat %d and lon %d', latitude, longitude);
+      console.log('InterZone not found for id %d', id);
       return res.send(404);
     }
 

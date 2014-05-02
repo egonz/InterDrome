@@ -11,6 +11,10 @@ angular.module('interDromeApp')
           name: '@name',
           loc: '@loc', 
           points: '@points',
+          angle: '@angle',
+          pan: '@pan',
+          zoom: '@zoom',
+          default_zone: '@default_zone',
           bleep_zones: '@bleep_zones'
         }
       },
