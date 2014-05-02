@@ -55,22 +55,22 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
     }, true);
 
     $scope.$watch("interZone.angle", function (newValue, oldValue) {
-        if (oldValue !== -1) {
+        if (typeof $scope.interZone !== 'undefined' && oldValue !== -1) {
             $scope.interZone.dirty = true;
         }
     });
     $scope.$watch("interZone.points", function (newValue, oldValue) {
-        if (oldValue.length !== 0) {
+        if (typeof oldValue !== 'undefined' && oldValue.length !== 0) {
             $scope.interZone.dirty = true;
         }
     });
     $scope.$watch("interZone.pan", function (newValue, oldValue) {
-        if (oldValue !== -1) {
+        if (typeof oldValue !== 'undefined' && oldValue !== -1) {
             $scope.interZone.dirty = true;
         }
     });
     $scope.$watch("interZone.zoom", function (newValue, oldValue) {
-        if (oldValue !== -1) {
+        if (typeof oldValue !== 'undefined' && oldValue !== -1) {
             $scope.interZone.dirty = true;
         }
     });
@@ -92,7 +92,7 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
         };
     }
 
-    function loadInterZones(selectedName) {
+    function loadInterZones(selectedName, callback) {
         console.log('Loading InterZones. Selecting Name: ' + selectedName);
         var izData = InterZone.get(function(izData) {
             izData.interZones.unshift({_id:"", name:""});
@@ -107,24 +107,31 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
                                 $scope.interZoneControl.reset($scope.interZone.points);
                             } catch (e) {}
                         }
+                        if (typeof callback !== 'undefined')
+                            callback();
                         return;
                     }
                 }
+            } else {
+                if (typeof callback !== 'undefined')
+                    callback();
             }
-
-            // $scope.interZoneDataClean = JSON.parse(JSON.stringify(bleep))
         });
     }
 
     function init() {
-        loadInterZones();
-        newInterZoneInstance();
+        loadInterZones(undefined, function() {
+            var selected = $scope.selectDefaultZone();
+            console.log(selected);
+            if (!selected) {
+                newInterZoneInstance();
+                $scope.interZoneEditInfo = false;
+                $scope.newInterZone = false;
+                $scope.showMap = false;
+            }
 
-        $scope.interZoneEditInfo = false;
-        $scope.newInterZone = false;
-        $scope.showMap = false;
-
-        $scope.autocomplete = undefined;
+            $scope.autocomplete = undefined;
+        });
     }
 
     function saveComplete() {
@@ -318,6 +325,23 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
                 favorite($scope.interZone);
             });
         }
+    }
+
+    $scope.selectDefaultZone = function() {
+        for (var i = 0; i < $scope.interZoneData.interZones.length; i++) {
+            if ($scope.interZoneData.interZones[i].default_zone) {
+                if (typeof $scope.interZone !== 'undefined' && 
+                    $scope.interZoneData.interZones[i]._id === $scope.interZone._id) {
+                    return;
+                } else {
+                    $scope.interZone = $scope.interZoneData.interZones[i];
+                    $scope.interZoneSelected();
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     init();
