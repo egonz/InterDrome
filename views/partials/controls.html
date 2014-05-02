@@ -34,6 +34,31 @@
 	</div>
 </div>
 
+<div class="row">
+	<div class="panel panel-default">
+		<div class="panel-heading">Wemo</div>
+		<div class="panel-body">
+			 <button class="btn btn-info btn-sm" ng-click="discoverWemoDevices()" ng-disabled="discoverWemoDevicesDisabled">
+			 	<i ng-class="{true:'fa fa-spinner fa-spin', false:'glyphicon glyphicon-search'}[discoverWemoDevicesDisabled]"></i> Discover
+			 </button>
+		</div>
+
+		<table class="table table-hover">
+			<th>Name</th>
+			<th>IP Address</th>
+			<th></th>
+	    	<tr ng-repeat="wemo in wemo.devices">
+	    		<td>{{wemo.friendlyName}}</td>
+		      	<td>{{wemo.ip}}</td>
+			  	<td>
+			      	<button class="btn btn-success btn-sm" data-toggle="modal" data-target="#configure-wemo-device" ng-click="openWemoDeviceModal(wemo)"> <i class="glyphicon glyphicon-cog"></i> Configure
+			        </button>
+			  	</td>
+	    	</tr>
+	  	</table>
+	</div>
+</div>
+
 <div>
     <script type="text/ng-template" id="hue-bridge-modal-register-content">
         <div class="modal-header">
@@ -57,7 +82,7 @@
 <div>
     <script type="text/ng-template" id="hue-bridge-modal-lights-content">
         <div class="modal-header">
-            <h4>Lights</h4>
+            <input type="text" ng-model="bridge.name" ng-keydown="setHueBridgeName($event.keyCode)" placeholder="Bridge Name" /> <span>Lights</span> {{keyCode}}
         </div>
         <div class="modal-body modal-step">
             <div ng-repeat="light in lights">
@@ -71,6 +96,28 @@
 	            	{{light.name}}
 	            </div>
             </div>
+        </div>
+        <div class="modal-footer">
+        	<button class="btn btn-warning" ng-click="cancel()">Close</button>
+        </div>
+        <div>
+		  	<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+		</div>
+    </script>
+</div>
+
+<div>
+    <script type="text/ng-template" id="wemo-device-content">
+        <div class="modal-header">
+            <h4>{{wemoDevice.friendlyName}}</h4>
+        </div>
+        <div class="modal-body modal-step">
+            <button class="btn btn-success btn-sm" ng-click="turnOn()"> 
+	        	<i class="fa fa-lightbulb-o"></i> On
+	        </button>
+	       	<button class="btn btn-danger btn-sm" ng-click="turnOff()"> 
+	        	<i class="fa fa-power-off"></i> Off
+	       	</button>
         </div>
         <div class="modal-footer">
         	<button class="btn btn-warning" ng-click="cancel()">Close</button>
