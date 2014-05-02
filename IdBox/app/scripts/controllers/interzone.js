@@ -255,7 +255,7 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
             // $scope.interZone = data;
             saveComplete();
         }, function(data,headers) {
-            BootstrapGrowl.error('Error saving InterZone; ' + data, bootstrapGrowlOptions);             
+            BootstrapGrowl.error('Error saving InterZone; ' + JSON.stringify(data), bootstrapGrowlOptions);             
         });
     }
 
