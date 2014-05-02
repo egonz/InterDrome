@@ -259,6 +259,45 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
         });
     }
 
+    function unFavorite(selected, callback) {
+        var foundFav;
+
+        for (var i = 0; i < $scope.interZoneData.interZones.length; i++) {
+            if (((selected && $scope.interZoneData.interZones[i]._id ===
+                  $scope.interZone._id) || (!selected && 
+                  $scope.interZoneData.interZones[i]._id !== $scope.interZone._id)) &&
+                  $scope.interZoneData.interZones[i].default_zone) {
+                console.log('unfavoriting ' + $scope.interZoneData.interZones[i].name);
+                foundFav = $scope.interZoneData.interZones[i];
+            }
+        }
+
+        if (typeof foundFav !== 'undefined') {
+            var interZone = InterZone.get({id:foundFav._id}, function(interZone) {
+                interZone.default_zone = false; 
+                interZone.$update({ id:foundFav._id }, function(data) {
+                    foundFav.default_zone = false;
+                    if (typeof callback !== 'undefined')
+                        callback();
+                });
+            });
+        } else {
+            callback();
+        }
+    }
+
+    function favorite(iz, callback) {
+        var interZone = InterZone.get({id:iz._id}, function(interZone) {
+            interZone.default_zone = true; 
+            interZone.$update({ id:iz._id }, function(data) {
+                console.log('favorited ' + iz.name);
+                iz.default_zone = true;
+                if (typeof callback !== 'undefined')
+                    callback();
+            });
+        });
+    }
+
     $scope.clearInterZone = function() {
         $scope.interZoneEditorControl.clear();
     }
@@ -269,6 +308,16 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
 
     $scope.checkName = function(data) {
         console.log('Checking name ' + data);
+    }
+
+    $scope.changeFavorite = function() {
+        if ($scope.interZone.default_zone) {
+            unFavorite(true);
+        } else {
+            unFavorite(false, function() {
+                favorite($scope.interZone);
+            });
+        }
     }
 
     init();
