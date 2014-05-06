@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $rootScope, $http, 
-        idSocket, InterZone, BootstrapGrowl) {
+        idSocket, InterZone, BootstrapGrowl, Bleep) {
     
-    $scope.debug = true;
+    $scope.debug = false;
     $scope.width = 1024;
     $scope.height = 468;
     $scope.interZoneEdit = false;
@@ -16,6 +16,9 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
     $scope.interZoneEditorControl = {};
     $scope.mapControl = {};
     $scope.interZonePoints;
+    $scope.minimized = true;
+    $scope.bleepData = Bleep.get();
+    $scope.bleepZones = [];
 
     $scope.lastView = {
         map: false,
@@ -128,6 +131,9 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
                 $scope.interZoneEditInfo = false;
                 $scope.newInterZone = false;
                 $scope.showMap = false;
+                $scope.minimized = false;
+            } else {
+                $scope.minimized = true;
             }
 
             $scope.autocomplete = undefined;
@@ -177,6 +183,7 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
         $scope.details = undefined;
 
         $scope.interZonePoints = $scope.interZone.points;
+        $scope.bleepZones = $scope.interZone.bleep_zones || [];
 
         if ($scope.interZoneControl.reset !== 'undefined') {
             try {
@@ -342,6 +349,49 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
         }
 
         return false;
+    }
+
+    $scope.minMax = function() {
+        console.log('minMax');
+        if ($scope.minimized) {
+            $scope.minimized = false;
+            $('.collapse').collapse('show');
+        } else {
+            $scope.minimized = true;
+            $('.collapse').collapse('hide');
+        }
+    }
+
+    $scope.collapseClass = function(cls) {
+        if ($scope.minimized) {
+            return cls + ' collapse';
+        } else {
+            return cls + ' collapse in';
+        }
+    }
+
+    $scope.minimizeToolTip = function() {
+        if ($scope.minimized) {
+            return 'Click to Maximize';
+        } else {
+            return 'Click to Minimize';
+        }
+    }
+
+    $scope.favoriteToolTip = function() {
+        if ($scope.interZone.default_zone) {
+            return 'Click to Reset Favorite';
+        } else {
+            return 'Click to Favorite';
+        }
+    }
+
+    $scope.addBleep = function(bleep) {
+        for(var i=0; i < $scope.bleepZones.length; i++) {
+            if ($scope.bleepZones[i]._id === bleep._id)
+                return;
+        }
+        $scope.interZoneControl.addBleep(bleep);
     }
 
     init();

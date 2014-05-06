@@ -9,12 +9,12 @@ circle,
 .line {
   fill: none;
   stroke: steelblue;
-  stroke-width: 2.5px;
+  stroke-width: 1px;
 }
 
-#interdrome-floor-plan path {
-  fill: #df691a;
-  fill-opacity:0.18;
+#interzone-floor-plan path {
+  fill: #AAA;
+  fill-opacity:0.318;
   stroke-opacity: 1;
 }
 
@@ -26,7 +26,7 @@ circle,
 
 circle {
   fill: #fff;
-  fill-opacity: .2;
+  fill-opacity: .5;
   cursor: move;
 }
 
