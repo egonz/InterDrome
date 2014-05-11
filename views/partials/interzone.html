@@ -2,7 +2,19 @@
 
 <div id="bootstrap-growl"></div>
 
-<div id="interzones" class="row">
+<!--
+<div>
+	<ul ng-repeat="bleep in interZone.bleeps">
+		<li> {{bleep.location}}</li>
+	</ul>
+</div>
+-->
+
+<div class="row" ng-show="interZone._id">
+	<span ng-class="{true:'glyphicon glyphicon-chevron-right min-max', false:'glyphicon glyphicon-chevron-down min-max'}[minimized]" tooltip="{{minimizeToolTip()}}" ng-click="minMax()"></span>
+</div>
+
+<div id="interzones" ng-class="collapseClass('row')">
 	<div class="well col-md-12">
 		<div class="col-md-4">
 			<select id="interzones-select" class="form-control" ng-model="interZone" ng-change="interZoneSelected()" ng-options="interzone.name for interzone in interZoneData.interZones">
@@ -19,7 +31,7 @@
 		<div class="col-md-4">
 			<span class="space-md-1">Or</span>
 			<button type="button" class="btn btn-success" ng-click="selectDefaultZone()">
-		  		<span class="fa fa-star"></span> Default
+		  		<span class="fa fa-star"></span> Favorite
 			</button>
 		</div>
 	</div>
@@ -40,15 +52,16 @@
 
 <div ng-if="interZoneEditInfo && interZone.loc">
 	<div id="interzone-name" class="row">
-		<div class="col-lg-6">
+		<div class="col-lg-7">
 			<h4>
+				<span id="iz-fav" tooltip="{{favoriteToolTip()}}" ng-class="{true:'fa fa-star', false:'fa fa-star-o'}[interZone.default_zone]" ng-click="changeFavorite()"></span>
 				<a href="#" editable-text="interZone.name" onbeforesave="checkName($data)">
 				{{ interZone.name || 'Enter InterZone Name' }}
 				</a>
 			</h4>
 		</div>
 	</div>
-	<div id="interzone-editor-buttons" class="row">
+	<div id="interzone-editor-buttons" ng-class="collapseClass('row')">
 		<div class="col-lg-6">
 			<button type="submit" class="btn btn-default btn-sm interzone-editor-button" ng-click="saveInterZone()">
 		  		<span class="glyphicon glyphicon-save"></span> Save
@@ -73,9 +86,18 @@
 			<button type="button" class="btn btn-default btn-sm interzone-editor-button" ng-click="cancelEdit()" ng-show="interZoneEdit && showMap">
 		  		<span class="icomoon icon-cancel-circle"></span> Cancel
 			</button>
+
+			<span id="bleeps-select" class="dropdown" ng-show="interZoneView">
+			  <a role="button" data-toggle="dropdown" href="#">Add Bleep <b class="caret"></b></a>
+			  <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+			    <li ng-repeat="bleep in bleepData.bleeps">
+			      <a ng-click="addBleep(bleep)" class="bleep-list-item">{{bleep.name}}</a>
+			    </li>
+			  </ul>
+			</span>
 		</div>
 	</div>
-	<div class="row" ng-show="interZoneView">
+	<div ng-class="collapseClass('row')" ng-show="interZoneView">
 		<div class="col-lg-12">
 			<span class="interzone-info-label">lat: </span>
 			<span class="interzone-info">{{interZone.loc.latitude}}</span>
@@ -89,7 +111,7 @@
 			<span class="interzone-info">{{interZone.zoom}}</span>
 		</div>
 	</div>
-	<div class="row" ng-show="debug">
+	<div ng-class="collapseClass('row')" ng-show="debug">
 		<div class="col-lg-8">
 			<span class="interzone-info">Debug:</span> 
 			<span class="interzone-info-label">showMap:</span> 
@@ -107,7 +129,7 @@
 		</interzone-editor>
 	</div>
 	<div id="interzone-view" class="row" ng-show="interZoneView">	
-		<interzone-drag-zoom width="interZoneWidth" height="interZoneHeight" points="interZonePoints" angle="interZone.angle" pan="interZone.pan" zoom="interZone.zoom" control="interZoneControl"></interzone-drag-zoom>
+		<interzone-drag-zoom width="interZoneWidth" height="interZoneHeight" points="interZonePoints" angle="interZone.angle" pan="interZone.pan" zoom="interZone.zoom" control="interZoneControl" bleeps="interZone.bleeps"></interzone-drag-zoom>
 	</div>
 	<div class="rotate-slider" ng-show="interZoneView">
 		<bootstrap-slider model="interZone.angle" type="text" value="" data-slider-min="0" data-slider-max="360" data-slider-step="1" bootstrap-slider-value="{{angle}}" data-slider-orientation="vertical" data-slider-selection="after" data-slider-tooltip="show" handle="square"></bootstrap-slider>
