@@ -15,6 +15,7 @@ angular.module('interDromeApp', [
     console.log('Creating Socket.io connection factory');
     var mySocket = socketFactory();
     mySocket.forward('connected');
+    mySocket.forward('beacon-info');
     mySocket.forward('bleep-enter');
     mySocket.forward('bleep-exit');
     mySocket.forward('hue-bridges');

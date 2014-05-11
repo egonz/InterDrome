@@ -15,7 +15,7 @@ angular.module('interDromeApp')
           pan: '@pan',
           zoom: '@zoom',
           default_zone: '@default_zone',
-          bleep_zones: '@bleep_zones'
+          bleeps: '@bleeps'
         }
       },
       get: {

@@ -141,12 +141,9 @@ angular.module('interDromeApp')
       _scope = scope;
       _points = scope.points;
 
-      console.log('Creating Interzone Editor');
-
       scope.internalControl = scope.control || {};
 
       scope.internalControl.reset = function(p) {
-        console.log('InterzoneEditor reset called');
         d3.select(el[0]).selectAll("svg").remove();
         
         _points = p;
@@ -164,6 +161,8 @@ angular.module('interDromeApp')
       }
 
       init(scope, el, attr);
+
+      scope.internalControl.ready();
     }
 
     return {

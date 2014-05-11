@@ -36,7 +36,8 @@ module.exports = function(app) {
   app.get('/api/wemos', wemo.all);
 
   app.get('/api/bleeps', bleep.all);
-  app.put('/api/bleeps', bleep.update);
+  app.get('/api/bleeps/:id', bleep.show);
+  app.put('/api/bleeps/:id', bleep.update);
 
   app.get('/api/beacons', beacon.all);
   app.put('/api/beacons', beacon.update);
@@ -44,10 +45,10 @@ module.exports = function(app) {
   app.post('/api/notifications', notification.create);
   app.put('/api/notifications', notification.update);
   app.get('/api/notifications', notification.all);
-
+  
+  app.get('/api/interzones', interzone.all);
   app.post('/api/interzones', interzone.create);
   app.put('/api/interzones/:id', interzone.update);
-  app.get('/api/interzones', interzone.all);
   app.get('/api/interzones/:id', interzone.show);
 
   // All undefined api routes should return a 404

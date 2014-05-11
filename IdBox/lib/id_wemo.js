@@ -93,7 +93,7 @@ module.exports = function(lcd, socket) {
 
 		if (_firstDeviceFound) {
 			_firstDeviceFound = false;
-			_flashLights(device);
+			// _flashLights(device);
 		}
 
 		lcd.print('Connected to\nWemo Device\n', lcd.colors.GREEN);

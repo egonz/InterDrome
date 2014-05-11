@@ -18,7 +18,6 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
     $scope.interZonePoints;
     $scope.minimized = true;
     $scope.bleepData = Bleep.get();
-    $scope.bleepZones = [];
 
     $scope.lastView = {
         map: false,
@@ -44,6 +43,24 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
     };
 
     var bootstrapGrowlOptions = {ele: '#bootstrap-growl'};
+
+    $scope.$on('socket:beacon-info', function (ev, data) {
+        if (!data.err) {
+            beaconInfo(data.bleep, data.beacon);
+        }
+    });
+
+    $scope.$on('socket:bleep-enter', function (ev, data) {
+        if (!data.err) {
+            bleepEnter(data.bleep, data.beaconAddr);
+        }
+    });
+
+    $scope.$on('socket:bleep-exit', function (ev, data) {
+        if (!data.err) {
+            bleepExit(data.bleep, data.beaconAddr);
+        }
+    });
 
     //Listen for Google Places data
     $scope.$watch("details.geometry", function () {
@@ -96,7 +113,6 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
     }
 
     function loadInterZones(selectedName, callback) {
-        console.log('Loading InterZones. Selecting Name: ' + selectedName);
         var izData = InterZone.get(function(izData) {
             izData.interZones.unshift({_id:"", name:""});
             $scope.interZoneData = izData;
@@ -125,7 +141,6 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
     function init() {
         loadInterZones(undefined, function() {
             var selected = $scope.selectDefaultZone();
-            console.log(selected);
             if (!selected) {
                 newInterZoneInstance();
                 $scope.interZoneEditInfo = false;
@@ -143,8 +158,6 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
     function saveComplete() {
         BootstrapGrowl.success('InterZone Saved', bootstrapGrowlOptions);
         
-        console.log(JSON.stringify($scope.interZone));
-
         loadInterZones($scope.interZone.name);
         
         $scope.interZone.dirty = false;
@@ -152,6 +165,17 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
         $scope.interZoneView = true;
         $scope.newInterZone = false;
     }
+
+    // TODO Delete
+    // function getBleepIds() {
+    //     var bleepIds = [];
+
+    //     for (var i=0; i<$scope.interZone.bleeps.length; i++) {
+    //         bleepIds.push($scope.interZone.bleeps[i]._id);
+    //     }
+
+    //     return bleepIds;
+    // }
 
     $scope.createInterZone = function() {
         $scope.lastView.map = true;
@@ -169,8 +193,6 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
     }
 
     $scope.interZoneSelected = function() {
-        console.log('Editing ' + JSON.stringify($scope.interZone));
-
         $scope.lastView.map = false;
         $scope.lastView.selectedView = true;
         
@@ -183,7 +205,6 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
         $scope.details = undefined;
 
         $scope.interZonePoints = $scope.interZone.points;
-        $scope.bleepZones = $scope.interZone.bleep_zones || [];
 
         if ($scope.interZoneControl.reset !== 'undefined') {
             try {
@@ -233,7 +254,7 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
             $scope.interZoneEdit = false;
 
             if (typeof $scope.interZone._id !== 'undefined') {
-                var interZone = InterZone.get({id:$scope.interZone._id}, function(interZone) {
+                 var interZone = InterZone.get({id:$scope.interZone._id}, function(interZone) {
                     console.log('InterZone found with id ' + interZone._id);
                     interZone.name = $scope.interZone.name;
                     interZone.angle = $scope.interZone.angle;
@@ -241,11 +262,13 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
                     interZone.zoom = $scope.interZone.zoom;
                     interZone.default_zone = $scope.interZone.default_zone;
                     interZone.points = $scope.interZone.points;
+                    // TODO Delete
+                    // interZone.bleeps = getBleepIds();
+                    interZone.bleeps = $scope.interZone.bleeps;
 
                     console.log('Updating InterZone to: ' + JSON.stringify(interZone));
 
                     interZone.$update({ id:interZone._id }, function(data) {
-                        console.log("saveInterZone update callback");
                         saveComplete();
                     });
                 }, function(err) {
@@ -273,6 +296,14 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
         });
     }
 
+    $scope.interZoneControl.bleepChange = function(bleep) {
+        console.log('bleep changed. bleep location: ' + JSON.stringify(bleep.location));
+        
+        Bleep.update({id:bleep._id}, bleep, function () {
+            console.log('bleep update callback');
+        });
+    }
+
     function unFavorite(selected, callback) {
         var foundFav;
 
@@ -281,19 +312,15 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
                   $scope.interZone._id) || (!selected && 
                   $scope.interZoneData.interZones[i]._id !== $scope.interZone._id)) &&
                   $scope.interZoneData.interZones[i].default_zone) {
-                console.log('unfavoriting ' + $scope.interZoneData.interZones[i].name);
                 foundFav = $scope.interZoneData.interZones[i];
             }
         }
 
         if (typeof foundFav !== 'undefined') {
-            var interZone = InterZone.get({id:foundFav._id}, function(interZone) {
-                interZone.default_zone = false; 
-                interZone.$update({ id:foundFav._id }, function(data) {
-                    foundFav.default_zone = false;
-                    if (typeof callback !== 'undefined')
-                        callback();
-                });
+            foundFav.default_zone = false;
+            InterZone.update({id:foundFav._id}, foundFav, function(data) {
+                if (typeof callback !== 'undefined')
+                    callback();
             });
         } else {
             callback();
@@ -301,15 +328,58 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
     }
 
     function favorite(iz, callback) {
-        var interZone = InterZone.get({id:iz._id}, function(interZone) {
-            interZone.default_zone = true; 
-            interZone.$update({ id:iz._id }, function(data) {
-                console.log('favorited ' + iz.name);
-                iz.default_zone = true;
-                if (typeof callback !== 'undefined')
-                    callback();
-            });
+        iz.default_zone = true;
+        InterZone.update({id:iz._id}, iz, function(data) {
+            console.log('favorited ' + iz.name);
+            iz.default_zone = true;
+            if (typeof callback !== 'undefined')
+                callback();
         });
+    }
+
+    function beaconInfo(bleep, beacon) {
+        console.log('\nBeacon Info');
+        console.log('BLEEP interzone id ' + bleep.interZone);
+        if (bleep.interZone !== 'undefined' && 
+            $scope.interZone._id === bleep.interZone) {
+
+            for (var i=0; i < $scope.interZone.bleeps.length; i++) {
+                if ($scope.interZone.bleeps[i]._id === bleep._id) {
+                    $scope.interZone.bleeps[i].bleep = bleep;
+                    $scope.interZoneControl.beaconInfo(bleep, beacon);
+                }
+            }
+        }
+    }
+
+    function bleepEnter(bleep, beaconAddr) {
+        console.log('\nBLEEP Enter');
+        console.log('BLEEP interzone id ' + bleep.interZone);
+        if (bleep.interZone !== 'undefined' && 
+            $scope.interZone._id === bleep.interZone) {
+
+            for (var i=0; i < $scope.interZone.bleeps.length; i++) {
+                if ($scope.interZone.bleeps[i]._id === bleep._id) {
+                    $scope.interZone.bleeps[i].bleep = bleep;
+                    $scope.interZoneControl.bleepUpdate(bleep, beaconAddr, true);
+                }
+            }
+        }
+    }
+
+    function bleepExit(bleep, beaconAddr) {
+        console.log('\nBLEEP Exit');
+        console.log('BLEEP interzone id ' + bleep.interZone);
+        if (bleep.interZone !== 'undefined' && 
+            $scope.interZone._id === bleep.interZone) {
+
+            for (var i=0; i < $scope.interZone.bleeps.length; i++) {
+                if ($scope.interZone.bleeps[i]._id === bleep._id) {
+                    $scope.interZone.bleeps[i].bleep = bleep;
+                    $scope.interZoneControl.bleepUpdate(bleep, beaconAddr, false);
+                }
+            }
+        }
     }
 
     $scope.clearInterZone = function() {
@@ -352,7 +422,6 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
     }
 
     $scope.minMax = function() {
-        console.log('minMax');
         if ($scope.minimized) {
             $scope.minimized = false;
             $('.collapse').collapse('show');
@@ -387,12 +456,27 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
     }
 
     $scope.addBleep = function(bleep) {
-        for(var i=0; i < $scope.bleepZones.length; i++) {
-            if ($scope.bleepZones[i]._id === bleep._id)
+        for(var i=0; i < $scope.interZone.bleeps.length; i++) {
+            if ($scope.interZone.bleeps[i]._id === bleep._id) {
+                console.log('BLEEP already in zone.');
                 return;
+            }
         }
+        bleep.interZone = $scope.interZone._id;
         $scope.interZoneControl.addBleep(bleep);
     }
+
+    $scope.interZoneControl.ready = function() {
+        if (!$scope.interZone.newInstance) {
+            $scope.interZoneControl.reset($scope.interZone.points);
+        }
+    };
+
+    $scope.interZoneEditorControl.ready = function() {
+        if (!$scope.interZone.newInstance) {
+            $scope.interZoneEditorControl.reset($scope.interZone.points);
+        }
+    };
 
     init();
 });

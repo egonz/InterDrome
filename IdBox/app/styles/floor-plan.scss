@@ -9,7 +9,7 @@ circle,
 .line {
   fill: none;
   stroke: steelblue;
-  stroke-width: 1px;
+  stroke-width: 2px;
 }
 
 #interzone-floor-plan path {
@@ -52,4 +52,11 @@ circle {
   shape-rendering: crispEdges;
   vector-effect: non-scaling-stroke;
   opacity:0.18;
+}
+
+.beacon-circle-group-clock {
+  fill:white;
+  font-family:sans-serif;
+  font-size:7px;
+  opacity: .5; 
 }
