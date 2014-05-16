@@ -27,6 +27,36 @@ angular.module('interDromeApp')
 
     var SMALL = "rsmall", MEDIUM = "rmedium", LARGE = "rlarge";
 
+    function formatDateString(date, html) {
+      var d = new Date(date);
+      var mm = d.getMonth() + 1;
+      var hh = d.getHours();
+      var m = d.getMinutes();
+      var s = d.getSeconds();
+      var dd = "AM";
+      var h = hh;
+      if (h >= 12) {
+          h = hh-12;
+          dd = "PM";
+      }
+      if (h == 0) {
+          h = 12;
+      }
+      h = h<10?"0"+h:h;
+      m = m<10?"0"+m:m;
+      s = s<10?"0"+s:s;
+      mm = mm<10?"0"+mm:mm;
+
+      var formattedDateStr = mm + "/" + d.getDate() + "/" + d.getFullYear();
+      
+      if (html) 
+        formattedDateStr += " <span style='margin-left:3px'>" + h + "</span>:" + m + ":" + s + " " + dd;
+      else
+        formattedDateStr += " " + h + ":" + m + ":" + s + " " + dd;
+
+      return formattedDateStr;
+    }
+
     function pulseBlur(id) {
       var blurFilter = _bleepBlurFilters[id].filter;
       var blurStdDev = 1;
@@ -57,6 +87,14 @@ angular.module('interDromeApp')
           blurFilter.attr("stdDeviation", 0);
         }
       }, 90);
+    }
+
+    function stopPulseBlur(id) {
+      var blurFilter = _bleepBlurFilters[id].filter;
+      blurFilter.attr("stdDeviation", 1 / 5);
+
+      if (typeof _bleepBlurFilters[id].interval !== 'undefined')
+        clearInterval(_bleepBlurFilters[id].interval);
     }
 
     //TODO is this needed? Can it be moved into init?
@@ -128,80 +166,82 @@ angular.module('interDromeApp')
         _bleepBlurFilters[bleep._id].filter = blurFilter;
       }
 
-      if (!(bleep._id in _bleepSpheres)) {
-        var bleepg = _interZone.append("g")
-          .attr("id", bleep._id)
-          .data([{x: bleep.location.x, y: bleep.location.y}]);
-
-        //TODO move styles to stylesheet
-
-        bleepg.append("circle")
-          .attr("class", bleep._id)
-          .attr("cx", function(d) { return d.x; })
-          .attr("cy", function(d) { return d.y; })
-          .attr("r", _bleepRadius)
-          .attr("style", "fill:darkred;stroke:darkred;stroke-width:.5;fill-opacity:1;")
-          .attr("filter", "url(" + $location.path() + "#blur-" + bleep._id + ")");
-
-        var bleepSphere = bleepg.append("circle")
-          .attr("id", "bleep-" + bleep._id)
-          .attr("class", "bleep")
-          .attr("cx", function(d) { return d.x; })
-          .attr("cy", function(d) { return d.y; })
-          .attr("r", _bleepRadius)
-          .attr("cursor", "move")
-          .attr("style", "fill:red;stroke:white;fill-opacity:1;stroke-width:1;")
-          .attr("data-container","body")
-          .attr("data-toggle", "popover")
-          .attr("data-placement", "right")
-          .attr("data-content", bleep.name)
-          .call(d3.behavior.drag()
-            .origin(function(d) { return d; })
-            .on("dragstart", function(d) {
-              d3.event.sourceEvent.stopPropagation();
-              d3.select(this).classed("dragging", true);
-              $("#bleep-" + bleep._id).popover('hide');
-            })
-            .on("drag", function(d) {
-              $("#bleep-" + bleep._id).popover('hide');
-
-              bleep.location.x = Math.max(_bleepRadius, Math.min(_width - _bleepRadius, d3.event.x));
-              bleep.location.y = Math.max(_bleepRadius, Math.min(_height - _bleepRadius, d3.event.y));
-
-              if(!$rootScope.$$phase && !_scope.$$phase) {
-                _scope.$apply();
-              }
-
-              d3.select($("#" + bleep._id)[0]).selectAll("circle")
-                .attr("cx", d.x = bleep.location.x)
-                .attr("cy", d.y = bleep.location.y);
-            })
-            .on("dragend", function(d) {
-              d3.select(this).classed("dragging", false);
-
-              pulseBlur(bleep._id);
-              var _bleep = findBleep(bleep._id);
-              _scope.internalControl.bleepChange(_bleep);
-              addBeacons(_bleep);
-            }))
-          .on("mouseover", function() {
-            d3.event.preventDefault();
-            $("#bleep-" + bleep._id).popover('show');
-          })
-          .on("mouseout", function() {
-            d3.event.preventDefault();
-            $("#bleep-" + bleep._id).popover('hide');
-          });
-
-          _bleepSpheres[bleep._id] = {
-            sphere: bleepSphere,
-            rsmall: {},
-            rmedium: {},
-            rlarge: {}
-          };
-
-          pulseBlur(bleep._id);
+      if (bleep._id in _bleepSpheres) {
+        delete _bleepSpheres[bleep._id];
       }
+
+      var bleepg = _interZone.append("g")
+        .attr("id", bleep._id)
+        .data([{x: bleep.location.x, y: bleep.location.y}]);
+
+      //TODO move styles to stylesheet
+
+      bleepg.append("circle")
+        .attr("class", bleep._id)
+        .attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; })
+        .attr("r", _bleepRadius)
+        .attr("style", "fill:darkred;stroke:darkred;stroke-width:.5;fill-opacity:1;")
+        .attr("filter", "url(" + $location.path() + "#blur-" + bleep._id + ")");
+
+      var bleepSphere = bleepg.append("circle")
+        .attr("id", "bleep-" + bleep._id)
+        .attr("class", "bleep")
+        .attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; })
+        .attr("r", _bleepRadius)
+        .attr("cursor", "move")
+        .attr("style", "fill:red;stroke:white;fill-opacity:1;stroke-width:1;")
+        .attr("data-container","body")
+        .attr("data-toggle", "popover")
+        .attr("data-placement", "right")
+        .attr("data-content", bleep.name)
+        .call(d3.behavior.drag()
+          .origin(function(d) { return d; })
+          .on("dragstart", function(d) {
+            d3.event.sourceEvent.stopPropagation();
+            d3.select(this).classed("dragging", true);
+            $("#bleep-" + bleep._id).popover('hide');
+          })
+          .on("drag", function(d) {
+            $("#bleep-" + bleep._id).popover('hide');
+
+            bleep.location.x = Math.max(_bleepRadius, Math.min(_width - _bleepRadius, d3.event.x));
+            bleep.location.y = Math.max(_bleepRadius, Math.min(_height - _bleepRadius, d3.event.y));
+
+            if(!$rootScope.$$phase && !_scope.$$phase) {
+              _scope.$apply();
+            }
+
+            d3.select($("#" + bleep._id)[0]).selectAll("circle")
+              .attr("cx", d.x = bleep.location.x)
+              .attr("cy", d.y = bleep.location.y);
+          })
+          .on("dragend", function(d) {
+            d3.select(this).classed("dragging", false);
+
+            pulseBlur(bleep._id);
+            var _bleep = findBleep(bleep._id);
+            _scope.internalControl.bleepChange(_bleep);
+            addBeacons(_bleep);
+          }))
+        .on("mouseover", function() {
+          d3.event.preventDefault();
+          $("#bleep-" + bleep._id).popover('show');
+        })
+        .on("mouseout", function() {
+          d3.event.preventDefault();
+          $("#bleep-" + bleep._id).popover('hide');
+        });
+
+      _bleepSpheres[bleep._id] = {
+        sphere: bleepSphere,
+        rsmall: {},
+        rmedium: {},
+        rlarge: {}
+      };
+
+      pulseBlur(bleep._id);
     }
 
     function findBleep(id) {
@@ -247,7 +287,8 @@ angular.module('interDromeApp')
           .attr("data-container","body")
           .attr("data-toggle", "popover")
           .attr("data-placement", "bottom")
-          .attr("data-content", bleep.beacons[i].name)
+          .attr("data-content", beaconPopOver(bleep.beacons[i]))
+          .attr("data-html", "true")
           .on("mouseover", function() {
             d3.event.preventDefault();
             $(this).popover('show');
@@ -347,6 +388,18 @@ angular.module('interDromeApp')
       for (var i=0; i<bleep.beacons.length; i++) {
         $("#beacon-" + bleep.beacons[i]._id).popover('hide');
       }
+    }
+
+    function beaconPopOver(beacon) {
+      var popOverText = beacon.name;
+      
+      if (typeof beacon.bleepEnter !== 'undefined') {
+        // var d = new Date(beacon.bleepEnter);
+        popOverText += " <div><span style='margin-right:5px;'>Enter:</span> " + 
+          formatDateString(beacon.bleepEnter, true) + "</div>";
+      }
+
+      return popOverText;
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -492,6 +545,16 @@ angular.module('interDromeApp')
       scope.internalControl.beaconInfo = function(bleep, beacon) {
         //TODO only update single beacon (e.g. rssi)
         addBeacons(bleep, 0, true);
+      };
+
+      scope.internalControl.selectBeacon = function(beacon, bleep) {
+        pulseBlur(bleep._id);
+        $("#beacon-" + beacon._id).popover('show');
+      };
+
+      scope.internalControl.resetSelectedBeacon = function(beacon, bleep) {
+        stopPulseBlur(bleep._id);
+        $("#beacon-" + beacon._id).popover('hide');
       };
 
       init(scope, el, attr);

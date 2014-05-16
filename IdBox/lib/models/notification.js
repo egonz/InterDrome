@@ -4,8 +4,9 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
     
 /**
- * Bleep Schema
+ * Notification Schema
  */
+ // TODO Consider seperating email and pushover into seperate schemas 
 var NotificationSchema = new Schema({
   name: String,
   pushover_user: String,

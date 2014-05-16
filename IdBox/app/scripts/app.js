@@ -9,7 +9,8 @@ angular.module('interDromeApp', [
   'ngAutocomplete',
   'btford.socket-io',
   'ui.bootstrap',
-  'xeditable'
+  'xeditable',
+  'ngGrid'
 ])
   .factory('idSocket', function (socketFactory) {
     console.log('Creating Socket.io connection factory');
@@ -100,7 +101,7 @@ angular.module('interDromeApp', [
     editableOptions.theme = 'bs3';
     // Redirect to login if route requires auth and you're not logged in
     $rootScope.$on('$routeChangeStart', function (event, next) {
-      
+      $(".popover").css('display','none');
       if (next.authenticate && !Auth.isLoggedIn()) {
         $location.path('/login');
       }

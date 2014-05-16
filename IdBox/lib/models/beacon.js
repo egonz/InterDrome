@@ -11,6 +11,7 @@ var BeaconSchema = new Schema({
   address: String,
   addrBuf: [Number],
   rssi: Number,
+  bleepEnter: Date,
   bleep: { type: Schema.Types.ObjectId, ref: 'Bleep' },
   created: Date,
   updated: Date

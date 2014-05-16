@@ -12,6 +12,7 @@ var BleepSchema = new Schema({
   location: {x: Number, y: Number},
   beacons: [{ type: Schema.Types.ObjectId, ref: 'Beacon' }],
   interZone: { type: Schema.Types.ObjectId, ref: 'InterZone' },
+  actions: [{ type: Schema.Types.ObjectId, ref: 'BleepAction' }],
   created: Date,
   updated: Date
 });

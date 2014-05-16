@@ -9,7 +9,8 @@ $icon-font-path: "/bower_components/bootstrap-sass-official/vendor/assets/fonts/
 @import 'control';
 @import 'bleep';
 @import 'notification';
-@import 'floor-plan';
+@import 'interzone-svg';
+@import 'events';
 
 .browsehappy {
     margin: 0.2em 0;
@@ -160,4 +161,12 @@ a.editable-empty {
 
 .popover.right>.arrow:after {
     border-right-color: #333940 !important;
+}
+
+.id-row {
+    margin-bottom: 10px;
+}
+
+.id-check {
+    color: #5cb85c;
 }

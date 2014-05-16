@@ -42,7 +42,7 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
         options: mapOptions
     };
 
-    var bootstrapGrowlOptions = {ele: '#bootstrap-growl'};
+    var bootstrapGrowlOptions = {ele: '#interzone-bootstrap-growl'};
 
     $scope.$on('socket:beacon-info', function (ev, data) {
         if (!data.err) {
@@ -477,6 +477,34 @@ angular.module('interDromeApp').controller('InterZoneCtrl', function ($scope, $r
             $scope.interZoneEditorControl.reset($scope.interZone.points);
         }
     };
+
+    var lastFoundBeacon;
+
+    $scope.beaconSearch = function(beaconSearchName) {
+        if (beaconSearchName.length > 0) {
+            console.log('Beacon Search for ' + beaconSearchName);
+
+            var beaconFound = false;
+
+            for (var i=0; i < $scope.interZone.bleeps.length; i++) {
+                for (var j=0; j < $scope.interZone.bleeps[i].beacons.length; j++) {
+                    if ($scope.interZone.bleeps[i].beacons[j].name.indexOf(beaconSearchName) === 0) {
+                        lastFoundBeacon = {
+                          bleep: $scope.interZone.bleeps[i],
+                          beacon: $scope.interZone.bleeps[i].beacons[j]  
+                        };
+                        $scope.interZoneControl.selectBeacon(lastFoundBeacon.beacon, lastFoundBeacon.bleep);
+                        beaconFound = true;
+                    }
+                }
+            }
+        }
+
+        if (!beaconFound && typeof lastFoundBeacon !== 'undefined') {
+            $scope.interZoneControl.resetSelectedBeacon(lastFoundBeacon.beacon, lastFoundBeacon.bleep);
+            lastFoundBeacon = undefined;
+        }
+    }
 
     init();
 });

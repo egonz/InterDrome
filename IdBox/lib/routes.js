@@ -9,7 +9,10 @@ var api = require('./controllers/api'),
     beacon = require('./controllers/beacon'),
     wemo = require('./controllers/wemo'),
     notification = require('./controllers/notification'),
-    interzone = require('./controllers/interzone');
+    interzone = require('./controllers/interzone'),
+    bleepEvents = require('./controllers/bleep_event'),
+    hueLight = require('./controllers/hue_light'),
+    bleepActions = require('./controllers/bleep_action');
 
 var middleware = require('./middleware');
 
@@ -42,14 +45,28 @@ module.exports = function(app) {
   app.get('/api/beacons', beacon.all);
   app.put('/api/beacons', beacon.update);
 
-  app.post('/api/notifications', notification.create);
-  app.put('/api/notifications', notification.update);
   app.get('/api/notifications', notification.all);
+  app.post('/api/notifications', notification.create);
+  app.put('/api/notifications/:id', notification.update);
+  app.get('/api/notifications/:id', notification.show);
   
   app.get('/api/interzones', interzone.all);
   app.post('/api/interzones', interzone.create);
   app.put('/api/interzones/:id', interzone.update);
   app.get('/api/interzones/:id', interzone.show);
+
+  app.get('/api/hue/lights', hueLight.all);
+  app.post('/api/hue/lights', hueLight.create);
+  app.put('/api/hue/lights/:id', hueLight.update);
+  app.get('/api/hue/lights/:id', hueLight.show);
+
+  app.get('/api/bleep/actions', bleepActions.all);
+  app.post('/api/bleep/actions', bleepActions.create);
+  app.put('/api/bleep/actions/:id', bleepActions.update);
+  app.get('/api/bleep/actions/:id', bleepActions.show);
+
+  app.get('/api/bleep/events', bleepEvents.all);
+  app.get('/api/bleep/events/:id', bleepEvents.show);
 
   // All undefined api routes should return a 404
   app.get('/api/*', function(req, res) {

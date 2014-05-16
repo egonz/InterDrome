@@ -10,3 +10,26 @@
 #bleep-edit-beacons {
 	margin-left: 15px;
 }
+
+#enter-actions {
+	margin-left: 0px;
+	padding-left: 0px;
+}
+
+#bleep-actions div {
+	margin: 10px 0px 10px 0px;
+}
+
+.bleep-action,
+.bleep-action-sentence {
+	margin: 0px 5px 0px 0px;
+}
+
+.bleep-action {
+	font-weight: bold;
+	border-bottom: dashed 1px #FF8000 !important;
+}
+
+.bleep-action-icon {
+	margin-right: 3px;
+}

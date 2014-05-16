@@ -219,6 +219,14 @@ module.exports = function(lcd, pushover, socket, wemo, hue) {
             bleep.beacons.push(beacon._id);
             //Create Enter event
             saveBleepEvent(ENTER, bleep, beacon.address);
+
+            beacon.bleepEnter = Date.now();
+            beacon.created = Date.now();
+            beacon.save(function (err, beacon, numberAffected) {
+              if (err || numberAffected <= 0) {
+                console.log("Error saving beacon.");
+              }
+            })
           }
           checkForEnters(bleep, beaconAddrs, exits, enters, ++index);
         });
@@ -315,7 +323,7 @@ module.exports = function(lcd, pushover, socket, wemo, hue) {
           Bleep.findOne({ address: bleepAddr }) 
             .populate('beacons') 
             .exec(function (err, bleep) {
-              
+
             if (!err && bleep) {
               console.log('Adding reference to Bleep id ' + bleep._id);
               beacon.bleep = bleep._id;

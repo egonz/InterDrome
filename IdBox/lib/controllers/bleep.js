@@ -2,6 +2,7 @@
 
 var mongoose = require('mongoose'),
     Bleep = mongoose.model('Bleep'),
+    BleepAction = mongoose.model('BleepAction'),
     InterZone = mongoose.model('InterZone'),
     passport = require('passport');
 
@@ -24,11 +25,19 @@ exports.show = function(req, res, next) {
 
   Bleep.findById(id)
       .populate('beacons')
-      .exec(function (err, bleeps) {
+      .exec(function (err, bleep) {
     if (err) return next(err);
-    if (!bleeps) return res.send(404);
+    if (!bleep) return res.send(404);
 
-    res.send({ bleeps: bleeps });
+    bleep.actions = [];
+
+    BleepAction.find({ bleep: id }, { interZone: 0 })
+      .populate('hue_light wemo_device')
+      .exec(function(err, bleepActions) {
+        if (err) return next(new Error("Could not load bleep actions for bleep id: " + id));
+        bleep.actions.push(bleepActions);
+        res.send({ bleep: bleep });
+      });
   });
 };
 

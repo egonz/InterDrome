@@ -1,13 +1,15 @@
 'use strict';
 
 angular.module('interDromeApp')
-  .controller('BleepCtrl', function ($scope, Bleep, $modal, $log, idSocket, Beacon) {
+  .controller('BleepCtrl', function ($scope, Bleep, $modal, $log, idSocket, Beacon, Notification, $filter, HueLight, Wemo, BleepAction) {
 
   	$scope.bleepData = Bleep.get();
   	$scope.selectedBleepRef;
   	$scope.selectedBleep;
   	$scope.selectedBeacon;
-  	$scope.bleepChanged = false;
+    $scope.notificationData = Notification.get(setupNotifications);
+    $scope.hueLightData = HueLight.get(setupHueLights);
+    $scope.wemoData = Wemo.get(setupWemos);
   	var modalInstance;
 
   	$scope.$on('socket:bleep-enter', function (ev, data) {
@@ -43,6 +45,8 @@ angular.module('interDromeApp')
   	$scope.editBleep = function(bleep) {
   		$scope.selectedBleep = bleep;
   		$scope.selectedBleepRef = JSON.parse(JSON.stringify(bleep));
+
+      Bleep.get({id: $scope.selectedBleep._id}, setupBleepActions);
   	}
 
   	$scope.itemClass = function(item) {
@@ -53,61 +57,203 @@ angular.module('interDromeApp')
         return item === $scope.selectedBeacon ? 'list-group-item active' : "list-group-item";
     };
 
-    $scope.setBleepChanged = function() {
-    	if ($scope.selectedBleep.name !== $scope.selectedBleepRef.name) {
-    		$scope.bleepChanged = true;
-    	} else {
-    		$scope.bleepChanged = false;
-    	} 
-    }
-
-    $scope.saveBleep = function() {
-    	Bleep.update({
-    		id: $scope.selectedBleep._id, 
-    		name: $scope.selectedBleep.name
-    	});
-    	$scope.selectedBleepRef = JSON.parse(JSON.stringify($scope.selectedBleep));
-    	$scope.bleepChanged = false;
-    }
-
     $scope.showBeacon = function(beacon) {
     	$scope.selectedBeacon = beacon;
 
     	if (typeof modalInstance === 'undefined') {
 	    	modalInstance = $modal.open({
-				templateUrl: 'bleep-beacon-modal-content',
-				controller: BleepBeaconModalInstanceCtrl,
-				resolve: {
-					selectedBeacon: function() {
-						return $scope.selectedBeacon;
-					},
+  				templateUrl: 'bleep-beacon-modal-content',
+  				controller: BleepBeaconModalInstanceCtrl,
+  				resolve: {
+  					selectedBeacon: function() {
+  						return $scope.selectedBeacon;
+  					},
 
-					socket: function () {
-						return idSocket;
-					},
+  					socket: function () {
+  						return idSocket;
+  					},
 
-					beacon: function() {
-						return Beacon;
-					},
+  					beacon: function() {
+  						return Beacon;
+  					},
 
-					beaconChange: function() {
-						return beaconChange;
-					}
-				}
-			});
+  					beaconChange: function() {
+  						return beaconChange;
+  					}
+  				}
+        });
 
 	    	modalInstance.result.then(function () {
-			}, function () {
-				modalInstance = undefined;
-				$log.info('Modal dismissed at: ' + new Date());
-			});
-		}
+        }, function () {
+  				modalInstance = undefined;
+  				$log.info('Modal dismissed at: ' + new Date());
+  			});
+		  }
     }
 
     function beaconChange(beacon) {
     	$scope.selectedBeacon.name = beacon.name;
     }
 
+    $scope.eventTypes = [
+      {value: 'enter', text: 'enter'},
+      {value: 'exit', text: 'exit'}
+    ];
+
+    $scope.actionTypes = [
+      {value: 'notify', text: 'notify'},
+      {value: 'turn on', text: 'turn on'},
+      {value: 'turn off', text: 'turn off'}
+    ];
+
+    $scope.controlTypes = [
+      {value: 'Philips Hue', text: 'Philips Hue'},
+      {value: 'Wemo', text: 'Wemo'}
+    ];
+
+    function pluralize(name) {
+      if (name.indexOf(name + "'s") < 0)
+        return name + "'s";
+      else
+        return name;
+    }
+
+    function setupBleepActions(bleepData) {
+      $scope.bleepActions = [];
+
+      if (typeof bleepData !== 'undefined' && 
+          typeof bleepData.bleep !== 'undefined' &&
+          typeof bleepData.bleep.actions !== 'undefined') {
+
+        var actions = bleepData.bleep.actions;
+
+        for (var i=0; i<bleepActionData.data.length; i++) {
+          var bleepAction = bleepActionData.data[i];
+
+          $scope.inserted = {
+            id: $scope.bleepActions.length+1,
+            bleep_id: $scope.selectedBleep._id,
+            event_type: bleepAction.event_type,
+            action_type: bleepAction.event_type,
+            notification: bleepAction.pushover_user || bleepAction.email,
+            control_type: bleepAction.control_type,
+            hue_light: bleepAction.event_type,
+            wemo_device: bleepAction.wemo_device
+          };
+
+          $scope.bleepActions.push($scope.inserted);
+        }
+      }
+    }
+
+    function setupNotifications(notificationData) {
+      $scope.notifications = [];
+
+      if (typeof notificationData !== 'undefined' && 
+          typeof notificationData.data !== 'undefined') {
+
+        for (var i=0; i<notificationData.data.length; i++) {
+          var notification = {};
+
+          if (notificationData.data[i].email) {
+            $scope.notifications.push(
+              {value: notificationData.data[i].email, text: notificationData.data[i].email}
+            );
+          }
+
+          if (notificationData.data[i].pushover_user) {
+            $scope.notifications.push(
+              {value: notificationData.data[i].pushover_user, text: pluralize(notificationData.data[i].name) + ' Pushover'}
+            );
+          }
+        }
+      }
+    }
+
+    function setupHueLights(hueLightsData) {
+      $scope.hueLights = [];
+
+      console.log('Hue Lights Data ' + JSON.stringify(hueLightsData));
+
+      if (typeof hueLightsData !== 'undefined' && typeof hueLightsData.data !== 'undefined') {
+        for (var i=0; i<hueLightsData.data.length; i++ ) {
+          $scope.hueLights.push(
+            {value: hueLightsData.data[i].light_id, text: hueLightsData.data[i].name}
+          );
+        }
+      }
+    }
+
+    function setupWemos(wemoData) {
+      $scope.wemoLights = [];
+
+      console.log('Wemo Data ' + JSON.stringify(wemoData));
+
+      if (typeof wemoData !== 'undefined' && typeof wemoData.devices !== 'undefined') {
+        for (var i=0; i<wemoData.devices.length; i++ ) {
+          $scope.wemoLights.push(
+            {value: wemoData.devices[i].friendlyName, text: wemoData.devices[i].friendlyName}
+          );
+        }
+      }
+    }
+
+    $scope.newAction = function() {
+      console.log('New Action');
+
+      $scope.inserted = {
+        id: $scope.bleepActions.length+1,
+        bleep_id: $scope.selectedBleep._id,
+        event_type: null,
+        action_type: null,
+        notification: null,
+        control_type: null,
+        hue_light: null,
+        wemo_device: null
+      };
+
+      $scope.bleepActions.push($scope.inserted);
+
+      console.log('BLEEP Actions ' + JSON.stringify($scope.bleepActions));
+    }
+
+    $scope.notificationName = function(bleepAction) {
+      var selected = [];
+      if(bleepAction.notification) {
+        selected = $filter('filter')($scope.notifications, {value: bleepAction.notification});
+      }
+      return selected.length ? selected[0].text : 'Notification';
+    }
+
+    $scope.hueLightName = function(bleepAction) {
+      var selected = [];
+      if(bleepAction.hue_light) {
+        selected = $filter('filter')($scope.hueLights, {value: bleepAction.hue_light});
+      }
+      return selected.length ? selected[0].text : 'Light';
+    }
+
+    $scope.wemoLightName = function(bleepAction) {
+      var selected = [];
+      if(bleepAction.wemo_device) {
+        selected = $filter('filter')($scope.wemoLights, {value: bleepAction.wemo_device});
+      }
+      return selected.length ? selected[0].text : 'Light';
+    }
+
+    $scope.saveBleep = function() {
+      for (var i=0; i<$scope.bleepActions.length; i++) {
+        console.log($scope.bleepActions[i]);
+
+
+      }
+
+      Bleep.update({
+        id: $scope.selectedBleep._id, 
+        name: $scope.selectedBleep.name
+      });
+      $scope.selectedBleepRef = JSON.parse(JSON.stringify($scope.selectedBleep));
+    }
 });
 
 
@@ -128,7 +274,7 @@ var BleepBeaconModalInstanceCtrl = function ($scope, $modalInstance, selectedBea
     	$modalInstance.dismiss('cancel');
   	};
 
-  	$scope.save = function () {
+  $scope.save = function () {
   		Beacon.update({
     		id: selectedBeacon._id, 
     		name: $scope.selectedBeacon.name
@@ -138,5 +284,5 @@ var BleepBeaconModalInstanceCtrl = function ($scope, $modalInstance, selectedBea
     	$scope.beaconChanged = false;
 
     	beaconChange($scope.selectedBeacon);
-  	};
+  };
 }

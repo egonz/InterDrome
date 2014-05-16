@@ -1,14 +1,114 @@
 'use strict';
 
 angular.module('interDromeApp')
-  .controller('EventCtrl', function ($scope) {
+  .controller('EventCtrl', function ($scope, $http, idSocket) {
 
-  	$scope.interZoneWidth = 1024;
-    $scope.interZoneHeight = 468;
-    $scope.angle = 316;
-    $scope.pan = [-312.0016234354316,-115.4506741956165];
-    $scope.zoom = 1.584514132467325;
+  	$scope.filterOptions = {
+        filterText: "",
+        useExternalFilter: true
+    }; 
 
-	$scope.interZonePoints = [[470.83856201171875,77.34637451171875],[529.8385620117188,126.34637451171875],[545.8385620117188,116.34637451171875],[633.8385620117188,206.34637451171875],[610.8385620117188,232.34637451171875],[621.8385620117188,247.34637451171875],[592.8385620117188,295.34637451171875],[599.8385620117188,305.34637451171875],[547.8385620117188,357.34637451171875],[502.83856201171875,305.34637451171875],[524.8385620117188,279.34637451171875],[457.83856201171875,210.34637451171875],[465.83856201171875,197.34637451171875],[419.83856201171875,155.34637451171875],[455.83856201171875,110.34637451171875],[448.83856201171875,97.34637451171875],[470.83856201171875,75.34637451171875]];
+    $scope.totalServerItems = 0;
+    
+    $scope.pagingOptions = {
+        pageSizes: [250, 500, 1000],
+        pageSize: 250,
+        currentPage: 1
+    };
+
+    $scope.$on('socket:bleep-enter', function (ev, data) {
+        if (!data.err) {
+            $scope.getPagedDataAsync($scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
+        }
+    });
+
+    $scope.$on('socket:bleep-exit', function (ev, data) {
+        if (!data.err) {
+            $scope.getPagedDataAsync($scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
+        }
+    });
+
+    $scope.setPagingData = function(data, page, pageSize) {
+    	var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
+        $scope.bleepEventsData = pagedData;
+        $scope.totalServerItems = data.length;
+        if (!$scope.$$phase) {
+            $scope.$apply();
+        }
+    };
+
+    $scope.getPagedDataAsync = function (pageSize, page, searchText) {
+        setTimeout(function () {
+            var data;
+            if (searchText) {
+                var ft = searchText.toLowerCase();
+                $http.get('api/bleep/events').success(function (bleepEvents) {		
+                    data = bleepEvents.filter(function(item) {
+                        return JSON.stringify(item).toLowerCase().indexOf(ft) != -1;
+                    });
+                    $scope.setPagingData(data, page, pageSize);
+                });            
+            } else {
+                $http.get('api/bleep/events').success(function (bleepEvents) {
+                    $scope.setPagingData(bleepEvents, page, pageSize);
+                });
+            }
+        }, 100);
+    };
+
+    $scope.formatDate = function (date) {
+    	var d = new Date(date);
+		var mm = d.getMonth() + 1;
+		var hh = d.getHours();
+		var m = d.getMinutes();
+		var s = d.getSeconds();
+		var dd = "AM";
+		var h = hh;
+		if (h >= 12) {
+		  h = hh-12;
+		  dd = "PM";
+		}
+		if (h == 0) {
+		  h = 12;
+		}
+		h = h<10?"0"+h:h;
+		m = m<10?"0"+m:m;
+		s = s<10?"0"+s:s;
+		mm = mm<10?"0"+mm:mm;
+
+		var formattedDateStr = mm + "/" + d.getDate() + "/" + d.getFullYear();
+
+		formattedDateStr += " " + h + ":" + m + ":" + s + " " + dd;
+
+		return formattedDateStr;
+    }
+	
+    $scope.getPagedDataAsync($scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
+	
+    $scope.$watch('pagingOptions', function (newVal, oldVal) {
+        if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
+          $scope.getPagedDataAsync($scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage, $scope.filterOptions.filterText);
+        }
+    }, true);
+
+    $scope.$watch('filterOptions', function (newVal, oldVal) {
+        if (newVal !== oldVal) {
+          $scope.getPagedDataAsync($scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage, $scope.filterOptions.filterText);
+        }
+    }, true);
+	
+    $scope.gridOptions = {
+        data: 'bleepEventsData',
+        enablePaging: true,
+		showFooter: true,
+        totalServerItems: 'totalServerItems',
+        pagingOptions: $scope.pagingOptions,
+        filterOptions: $scope.filterOptions,
+        multiSelect: false,
+        columnDefs: [{field:'created', displayName:'Created', cellTemplate: '<div class="ngCellText">{{formatDate(row.getProperty(col.field))}}</div>'}, 
+        			 {field:'event', displayName:'Event'}, {field:'bleep.name', displayName:'BLEEP'}, 
+        			 {field:'beacon.name', displayName:'Beacon'}],
+        sortInfo: { fields: ['created'], directions: ['desc']}
+    };
 
 });

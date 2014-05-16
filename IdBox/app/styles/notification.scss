@@ -7,3 +7,22 @@
 	color: #111;
 	margin: 10px 0px 0px 0px;	
 }
+
+#notification-list {
+	margin-top: 10px;
+}
+
+#notification {
+	margin-top: 10px;
+}
+
+bootstrap-growl {
+    
+}
+
+#notification-bootstrap-growl div {
+	position: absolute !important;
+    z-index: 999;
+    top: 82px !important;
+	left: 607px !important;
+}

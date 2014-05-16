@@ -72,20 +72,6 @@ angular.module('interDromeApp')
       dragged = null;
     }
 
-    function keydown() {
-      if (!selected) return;
-      switch (d3.event.keyCode) {
-        case 8: // backspace
-        case 46: { // delete
-          var i = _points.indexOf(selected);
-          _points.splice(i, 1);
-          selected = _points.length ? _points[i > 0 ? i - 1 : 0] : null;
-          redraw();
-          break;
-        }
-      }
-    }
-
     function init(scope, el, attr) {
       width = scope.width;
       height = scope.height;
@@ -112,8 +98,7 @@ angular.module('interDromeApp')
 
       d3.select(window)
         .on("mousemove", mousemove)
-        .on("mouseup", mouseup)
-        .on("keydown", keydown);
+        .on("mouseup", mouseup);
 
       d3.select("#interpolate")
         .on("change", change)

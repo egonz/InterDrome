@@ -1,16 +1,16 @@
 'use strict';
 
 angular.module('interDromeApp')
-  .factory('Notification', function ($resource) {
-    return $resource('/api/notifications/:id', {
+  .factory('HueLight', function ($resource) {
+    return $resource('/api/hue/lights/:id', {
       id: '@id'
     }, { //parameters default
       update: {
         method: 'PUT',
         params: {
+          light_id: '@light_id',
           name: '@name',
-          pushover_user: '@pushover_user',
-          email: '@email'
+          bridge: '@bridge'
         }
       },
       get: {
