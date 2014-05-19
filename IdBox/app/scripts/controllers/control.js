@@ -142,7 +142,8 @@ angular.module('interDromeApp')
 // Please note that $modalInstance represents a modal window (instance) dependency.
 // It is not the same as the $modal service used above.
 
-var HueBridgeRegisterModalInstanceCtrl = function ($scope, $modalInstance, socket, bridge, registrationComplete) {
+var HueBridgeRegisterModalInstanceCtrl = ['$scope', '$modalInstance', 'socket', 'bridge', 'registrationComplete', 
+    function ($scope, $modalInstance, socket, bridge, registrationComplete) {
 
 	$scope.bridge = bridge;
   	$scope.registerHueBridgeDisabled = false;
@@ -175,9 +176,10 @@ var HueBridgeRegisterModalInstanceCtrl = function ($scope, $modalInstance, socke
   	$scope.cancel = function () {
     	$modalInstance.dismiss('cancel');
   	};
-};
+}];
 
-var HueBridgeLightsModalInstanceCtrl = function ($scope, $modalInstance, socket, selectedBridge, HueBridge) {
+var HueBridgeLightsModalInstanceCtrl = ['$scope', '$modalInstance', 'socket', 'selectedBridge', 'HueBridge',
+    function ($scope, $modalInstance, socket, selectedBridge, HueBridge) {
 
 	$scope.bridge = selectedBridge;
   $scope.alerts = [];
@@ -233,10 +235,10 @@ var HueBridgeLightsModalInstanceCtrl = function ($scope, $modalInstance, socket,
   	$scope.cancel = function () {
     	$modalInstance.dismiss('cancel');
   	};
-};
+}];
 
 
-var WemoDeviceModalInstanceCtrl = function ($scope, $modalInstance, socket, wemoDevice) {
+var WemoDeviceModalInstanceCtrl = ['$scope', '$modalInstance', 'socket', 'wemoDevice', function ($scope, $modalInstance, socket, wemoDevice) {
 
     $scope.alerts = [];
     $scope.wemoDevice = wemoDevice;
@@ -269,4 +271,4 @@ var WemoDeviceModalInstanceCtrl = function ($scope, $modalInstance, socket, wemo
     $scope.cancel = function () {
       $modalInstance.dismiss('cancel');
     };
-};
+}];

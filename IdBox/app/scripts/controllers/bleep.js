@@ -267,7 +267,8 @@ angular.module('interDromeApp')
 }]);
 
 
-var BleepBeaconModalInstanceCtrl = function ($scope, $modalInstance, selectedBeacon, Beacon, beaconChange) {
+var BleepBeaconModalInstanceCtrl = ['$scope', '$modalInstance', 'selectedBeacon', 'Beacon', 'beaconChange',
+    function ($scope, $modalInstance, selectedBeacon, Beacon, beaconChange) {
 	$scope.selectedBeacon = JSON.parse(JSON.stringify(selectedBeacon));
 	$scope.selectedBeaconRef = JSON.parse(JSON.stringify(selectedBeacon));
 	$scope.beaconChanged = false;
@@ -295,4 +296,4 @@ var BleepBeaconModalInstanceCtrl = function ($scope, $modalInstance, selectedBea
 
     	beaconChange($scope.selectedBeacon);
   };
-}
+}];
