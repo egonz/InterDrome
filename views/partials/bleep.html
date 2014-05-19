@@ -4,7 +4,7 @@
 	<div id="bleep-list-title">
 		Select a BLEEP to Edit:
 	</div>
-	<div id="bleep-list" class="list-group col-md-6" ng-repeat="bleep in bleepData.bleeps">
+	<div id="bleep-list" class="list-group col-md-4" ng-repeat="bleep in bleepData.bleeps">
 		<a ng-click="editBleep(bleep)" href="#" ng-show="bleep.name" ng-class="itemClass(bleep)">
 			{{bleep.name}} <span class="badge">{{bleep.beacons.length}}</span>
 		</a>
@@ -14,41 +14,93 @@
 		</a>
 	</div>
 
-	<div id="bleep-edit" class="col-md-6 well well-sm" ng-show="selectedBleep">
-		<form class="form-horizontal" role="form">
-			<div class="form-group">
-				<label for="inputEmail3" class="col-sm-2 control-label">Name</label>
-				<div class="col-sm-10">
-					<input type="text" class="form-control" id="bleep-name" placeholder="Name" ng-model="selectedBleep.name" ng-change="setBleepChanged()">
-				</div>
+	<div id="bleep-edit" class="col-md-8 well well-sm" ng-show="selectedBleep">
+		<div class="form-group">
+			<label for="inputEmail3" class="col-sm-2 control-label">Name</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" id="bleep-name" placeholder="Name" ng-model="selectedBleep.name" required="">
 			</div>
-			<div class="form-group">
-				<label for="inputPassword3" class="col-sm-2 control-label">Address</label>
-				<div id="bleep-address" class="col-sm-10">
-					{{selectedBleep.address}}
-				</div>
+		</div>
+		<div class="form-group">
+			<label for="inputPassword3" class="col-sm-2 control-label">Address</label>
+			<div id="bleep-address" class="col-sm-10">
+				{{selectedBleep.address}}
 			</div>
-			<div class="form-group">
-				<label for="inputPassword3" class="col-sm-2 control-label">Beacons</label>
-				<div id="bleep-edit-beacons" class="col-sm-9 list-group">
-					<div ng-repeat="beacon in selectedBleep.beacons">
-						<a ng-click="showBeacon(beacon)" href="#" ng-class="beaconItemClass(beacon)" data-toggle="modal">
-							<span ng-show="beacon.name">
-								{{beacon.name}}
-							</span>
-							<span ng-hide="beacon.name">
-								{{beacon.address}}
-							</span>
+		</div>
+		<div class="form-group">
+			<label for="inputPassword3" class="col-sm-2 control-label">Actions</label>
+			<div id="bleep-actions" class="col-sm-10">
+				<span ng-repeat="bleepAction in bleepActions | orderBy:'[event_type,action_type]':reverse">
+					<div>
+						<span class="bleep-action-sentence">On</span>
+						<a class="bleep-action" href="#" buttons="no" editable-select="bleepAction.event_type" e-ng-options="a.value as a.text for a in eventTypes">
+						    {{ bleepAction.event_type || 'Event' }}
 						</a>
+
+						<a ng-show="bleepAction.event_type" class="bleep-action" href="#" buttons="no" editable-select="bleepAction.action_type" e-ng-options="a.value as a.text for a in actionTypes">
+						    {{ bleepAction.action_type || 'Action' }}
+						</a>
+
+						<span class="bleep-action-sentence" ng-show="bleepAction.action_type==='notify'">
+							me
+						</span>
+						<span class="bleep-action-sentence" ng-show="bleepAction.action_type==='notify'">
+							at
+						</span>
+
+						<span ng-show="bleepAction.action_type==='turn on' || bleepAction.action_type==='turn off'" ng-class="{true:'bleep-action-icon ionicons ion-ios7-lightbulb', false:'bleep-action-icon ionicons ion-ios7-lightbulb-outline'}[bleepAction.action_type==='turn on']"></span>
+						
+						<span ng-show="bleepAction.action_type==='notify' && bleepAction.notification.indexOf('@')>0" class="bleep-action-icon icomoon icon-envelop"></span>
+
+						<span ng-show="bleepAction.action_type==='notify' && bleepAction.notification.indexOf('@')<0" class="bleep-action-icon glyphicon glyphicon-phone"></span>
+
+						<a ng-show="bleepAction.action_type==='notify'" class="bleep-action" href="#" buttons="no" editable-select="bleepAction.notification" e-ng-options="a.value as a.text for a in notifications" e-required="">
+						    {{ notificationName(bleepAction) }}
+						</a>
+
+						<a ng-show="bleepAction.action_type==='turn on' || bleepAction.action_type==='turn off'" class="bleep-action" href="#" buttons="no" editable-select="bleepAction.control_type" e-ng-options="a.value as a.text for a in controlTypes" e-required="">
+						    {{ bleepAction.control_type || 'Control' }}
+						</a>
+
+						<a ng-show="(bleepAction.action_type==='turn on' || bleepAction.action_type==='turn off') && 
+							bleepAction.control_type==='Philips Hue'" class="bleep-action" href="#" buttons="no" editable-select="bleepAction.hue_light" e-ng-options="a.value as a.text for a in hueLights" e-required="">
+						    {{ hueLightName(bleepAction) }}
+						</a>
+
+						<a ng-show="(bleepAction.action_type==='turn on' || bleepAction.action_type==='turn off') &&
+							bleepAction.control_type==='Wemo'" class="bleep-action" href="#" buttons="no" editable-select="bleepAction.wemo_device" e-ng-options="a.value as a.text for a in wemoLights" e-required="">
+						    {{ wemoLightName(bleepAction) }}
+						</a>
+
+						 <span ng-show="(bleepAction.action_type==='notify' && bleepAction.notification) || (bleepAction.action_type==='turn on' || bleepAction.action_type==='turn off') && (bleepAction.hue_light || bleepAction.wemo_device)" class="bleep-action-icon id-check fa fa-check"></span>
 					</div>
+				</span>
+
+				<div>
+					<button type="button" class="btn btn-info" ng-click="newAction()"><i class="glyphicon glyphicon-save"></i> New</button>
 				</div>
 			</div>
-			<div class="form-group">
-				<div class="col-sm-offset-2 col-sm-10">
-					<button type="submit" class="btn btn-primary" ng-click="saveBleep()" ng-disabled="!bleepChanged"><i class="glyphicon glyphicon-save"></i> Save</button>
+		</div>
+		<div class="form-group">
+			<label for="inputPassword3" class="col-sm-2 control-label">Beacons</label>
+			<div id="bleep-edit-beacons" class="col-sm-9 list-group">
+				<div ng-repeat="beacon in selectedBleep.beacons">
+					<a ng-click="showBeacon(beacon)" href="#" ng-class="beaconItemClass(beacon)" data-toggle="modal">
+						<span ng-show="beacon.name">
+							{{beacon.name}}
+						</span>
+						<span ng-hide="beacon.name">
+							{{beacon.address}}
+						</span>
+					</a>
 				</div>
 			</div>
-		</form>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="submit" class="btn btn-success" ng-click="saveBleep()"><i class="glyphicon glyphicon-save"></i> Save</button>
+			</div>
+		</div>
 	</div>
 </div>
 

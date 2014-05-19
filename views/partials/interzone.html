@@ -1,6 +1,6 @@
 <div ng-include="'partials/navbar'"></div>
 
-<div id="bootstrap-growl"></div>
+<div id="interzone-bootstrap-growl"></div>
 
 <!--
 <div>
@@ -58,6 +58,14 @@
 				<a href="#" editable-text="interZone.name" onbeforesave="checkName($data)">
 				{{ interZone.name || 'Enter InterZone Name' }}
 				</a>
+			</h4>
+		</div>
+
+		<div id="beacon-search" ng-show="interZoneView" class="col-lg-5">
+			<h4>
+				<form ng-submit="beaconSearch(beaconSearchName)">
+					<input type="text" placeholder="Beacon Search" class="form-control" ng-model="beaconSearchName">
+				</form>
 			</h4>
 		</div>
 	</div>

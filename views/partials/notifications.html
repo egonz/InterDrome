@@ -1,30 +1,34 @@
 <div ng-include="'partials/navbar'"></div>
 
+<div id="notification-bootstrap-growl"></div>
+
 <div class="row">
-	<div>
+	<div class="col-md-6">
 		<button class="btn btn-primary" ng-click="create()"><i class="fa fa-plus"></i> New</button>
 	</div>
+</div>
 
-	<div id="notification-list" class="list-group col-md-6" ng-repeat="notification in notifications">
-		<a ng-click="edit(notification)" href="#" ng-class="itemClass(notification)">
-			{{notification.name}}
-		</a>
+<div class="row">
+	<div class="col-md-6">
+		<div id="notification-list" class="list-group" ng-repeat="notification in notifications.data">
+			<a ng-click="edit(notification)" href="#" ng-class="itemClass(notification)">
+				{{notification.name}}
+			</a>
+		</div>
 	</div>
 
-
-
-	<div id="notification-edit" class="col-md-6 well well-sm" ng-show="createNotification">
-		<form class="form-horizontal" role="form">
+	<div id="notification" class="col-md-6 well well-sm" ng-show="notification">
+		<form class="form-horizontal" role="form" ng-submit="save()">
 			<div class="form-group">
 				<label for="" class="col-sm-2 control-label">Name</label>
 				<div class="col-sm-10">
-					<input required="" type="text" class="form-control" id="notification-name" placeholder="e.g. Joe Smith" ng-model="newNotification.name">
+					<input required="" type="text" class="form-control" id="notification-name" placeholder="e.g. Joe Smith" ng-model="notification.name">
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="" class="col-sm-2 control-label">Email</label>
 				<div class="col-sm-10">
-					<input type="text" class="form-control" id="notification-email" placeholder="e.g. foo@bar.com" ng-model="newNotification.email">
+					<input type="email" class="form-control" id="notification-email" placeholder="e.g. foo@bar.com" ng-model="notification.email">
 				
 					<div>
 						<!-- TODO Hide if SMTP is setup already -->
@@ -35,14 +39,14 @@
 			<div class="form-group">
 				<label for="" class="col-sm-2 control-label">Pushover UID</label>
 				<div class="col-sm-10">
-					<input type="text" class="form-control" id="notification-pushover-user-id" placeholder="Check your Pushover mobile app settings" ng-model="newNotification.pushoverUserId">
+					<input type="text" class="form-control" id="notification-pushover-user-id" placeholder="Check your Pushover mobile app settings" ng-model="notification.pushover_user">
 				</div>
 			</div>
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
-					<button id="save-new-notification" type="submit" class="btn btn-primary" ng-click="saveNewNotification()"><i class="glyphicon glyphicon-save"></i> Save</button>
+					<button id="save-new-notification" type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-save"></i> Save</button>
 
-					<button class="btn btn-warning" ng-click="cancelCreate()"><i class="icomoon icon-cancel-circle"></i> Cancel</button>
+					<button class="btn btn-warning" ng-click="cancel()"><i class="icomoon icon-cancel-circle"></i>  Cancel</button>
 				</div>
 			</div>
 		</form>

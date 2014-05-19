@@ -1,23 +1,15 @@
 <div ng-include="'partials/navbar'"></div>
 
+<div class="row id-row">
+	<div class="col-md-5">
+		<form ng-submit="eventSearch(eventSearchQuery)">
+			<input type="text" placeholder="Search" ng-model="eventSearchQuery" class="form-control">
+		</form>
+	</div>
+</div>
+
 <div class="row">
-	<h1>SVG Chart Demo</h1>
-
-	<!-- <div>
-		<label for="nAngle">
-     <span style="font-weight:bold;">angle</span>: <span id="nAngle-value">{{interzoneAngleSlider}}</span> <span><span style="font-weight:bold;">pan</span>: {{pan}} <span style="font-weight:bold;">zoom</span>: {{zoom}}</span>
-     	<span>
-		</label>
-	</div> -->
-	
-	<donut-chart></donut-chart>
-
-	<!-- <bleep width="570" height="540"></bleep> -->
-
-	<!-- <interzone-drag-zoom width="interZoneWidth" height="interZoneHeight" 
-		points="interZonePoints" angle="angle" pan="pan" zoom="zoom"></interzone-drag-zoom>
-
-	<div class="rotate-slider">
-		<bootstrap-slider model="angle" type="text" value="" data-slider-min="0" data-slider-max="360" data-slider-step="1" bootstrap-slider-value="{{angle}}" data-slider-orientation="vertical" data-slider-selection="after" data-slider-tooltip="show" handle="square"></bootstrap-slider>
-	</div> -->
+	<div class="col-md-12">
+		<div class="gridStyle" ng-grid="gridOptions"></div>
+	</div>
 </div>
