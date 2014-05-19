@@ -11,6 +11,7 @@ var mongoose = require('mongoose'),
  */
 exports.all = function (req, res, next) {
   Bleep.find()
+      .lean()
       .populate('beacons')
       .exec(function (err, bleeps) {
     if (err) return next(err);
@@ -24,22 +25,38 @@ exports.show = function(req, res, next) {
   var id = req.params.id;
 
   Bleep.findById(id)
-      .populate('beacons')
+      .lean()
+      .populate('beacons actions')
       .exec(function (err, bleep) {
     if (err) return next(err);
     if (!bleep) return res.send(404);
 
-    bleep.actions = [];
-
-    BleepAction.find({ bleep: id }, { interZone: 0 })
-      .populate('hue_light wemo_device')
-      .exec(function(err, bleepActions) {
-        if (err) return next(new Error("Could not load bleep actions for bleep id: " + id));
-        bleep.actions.push(bleepActions);
-        res.send({ bleep: bleep });
-      });
+    loadBleepActions(bleep, res, function() {
+      res.send({ bleep: bleep });
+    });
   });
 };
+
+function loadBleepActions(bleep, res, callback, index) {
+  if (typeof index === 'undefined')
+    index = 0;
+
+  if (typeof bleep.actions === 'undefined' || index === bleep.actions.length) {
+    callback();
+    return;
+  }
+
+  BleepAction.findById(bleep.actions[index]._id)
+    .lean()
+    .populate('hue_light wemo_device')
+    .exec(function(err, bleepAction) {
+      if (err) return next(new Error("Could not load bleep actions for bleep id: " + id));
+      if (bleepAction)
+        bleep.actions[index] = bleepAction;
+      
+      loadBleepActions(bleep, res, callback, ++index);
+  });
+}
 
 /**
  *  Update BLEEP

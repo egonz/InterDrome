@@ -30,7 +30,7 @@
 		<div class="form-group">
 			<label for="inputPassword3" class="col-sm-2 control-label">Actions</label>
 			<div id="bleep-actions" class="col-sm-10">
-				<span ng-repeat="bleepAction in bleepActions" >
+				<span ng-repeat="bleepAction in bleepActions | orderBy:'[event_type,action_type]':reverse" >
 					<div>
 						<span class="bleep-action-sentence">On</span>
 						<a class="bleep-action" href="#" buttons="no" editable-select="bleepAction.event_type" 
@@ -63,20 +63,20 @@
 						</a>
 
 						<a ng-show="bleepAction.action_type==='turn on' || bleepAction.action_type==='turn off'" class="bleep-action" 
-							href="#" buttons="no" editable-select="bleepAction.controlType" 
+							href="#" buttons="no" editable-select="bleepAction.control_type" 
 							e-ng-options="a.value as a.text for a in controlTypes" e-required>
-						    {{ bleepAction.controlType || 'Control' }}
+						    {{ bleepAction.control_type || 'Control' }}
 						</a>
 
 						<a ng-show="(bleepAction.action_type==='turn on' || bleepAction.action_type==='turn off') && 
-							bleepAction.controlType==='Philips Hue'" class="bleep-action" 
+							bleepAction.control_type==='Philips Hue'" class="bleep-action" 
 							href="#" buttons="no" editable-select="bleepAction.hue_light" 
 							e-ng-options="a.value as a.text for a in hueLights" e-required>
 						    {{ hueLightName(bleepAction) }}
 						</a>
 
 						<a ng-show="(bleepAction.action_type==='turn on' || bleepAction.action_type==='turn off') &&
-							bleepAction.controlType==='Wemo'" class="bleep-action" 
+							bleepAction.control_type==='Wemo'" class="bleep-action" 
 							href="#" buttons="no" editable-select="bleepAction.wemo_device" 
 							e-ng-options="a.value as a.text for a in wemoLights" e-required>
 						    {{ wemoLightName(bleepAction) }}

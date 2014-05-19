@@ -9,21 +9,29 @@ var lcd,
     pushover,
     xbee,
     hue,
-    wemo;
+    wemo,
+    bleepActions;
 
 /**
  * Main application file
  */
 
- process.on('SIGINT', function() {
+// Set default node environment to development
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+
+// Application Config
+var config = require('./lib/config/config');
+
+process.on('SIGINT', function() {
 	console.log("\nGracefully shutting down from SIGINT (Ctrl-C)");
 	
 	if (typeof lcd !== 'undefined')
 		lcd.turn_off();
 
 	if (typeof pushover !== 'undefined') {
+		//TODO Send to admin pushover_user
 		pushover.send(pushover.message('Shutting Down.', 
-			'Shutting Down'), function(err, result) {
+			'Shutting Down'), config.pushover.user, function(err, result) {
 			if (err) {
             	console.log( 'Error sending Pushover Notification.' );
           	} else {
@@ -35,12 +43,6 @@ var lcd,
 	// some other closing procedures go here
 	process.exit();
 });
-
-// Set default node environment to development
-process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-
-// Application Config
-var config = require('./lib/config/config');
 
 // Connect to database
 var db = mongoose.connect(config.mongo.uri, config.mongo.options);
@@ -74,10 +76,12 @@ id_network_ip.getNetworkIPs(function (error, ip) {
 	hue = require('./lib/id_hue')(socket);
 	wemo = require('./lib/id_wemo')(lcd, socket);
 	pushover = require('./lib/id_pushover')(config);
-	xbee = require('./lib/id_xbee')(lcd, pushover, socket, wemo, hue);
+	bleepActions = require('./lib/id_bleep_actions')(pushover, wemo, hue);
+	xbee = require('./lib/id_xbee')(lcd, socket, bleepActions);
 
+	//TODO Send to admin pushover_user 
 	pushover.send(pushover.message("Inter.'.Drome Startup", 
-	    "Inter.'.Drome"), function(err, result) {
+	    "Inter.'.Drome"), config.pushover.user, function(err, result) {
 		if (err) {
 			console.log( 'Error sending Pushover Notification.' );
 		} else {

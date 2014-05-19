@@ -47,6 +47,8 @@ exports.create = function (req, res, next) {
     newBleepAction.bleep = bleep._id;
     newBleepAction.created = Date.now();
 
+    console.log('Creating new BleepAction ' + JSON.stringify(newBleepAction));
+
     newBleepAction.save(function(err, bleepAction) {
       if (err) return res.json(400, err);
       if (!bleepAction) return res.send(404);
@@ -78,6 +80,8 @@ exports.update = function (req, res, next) {
     bleepAction.action_type = req.body.action_type;
     bleepAction.control_type = req.body.control_type;
     bleepAction.updated = Date.now();
+
+    console.log('Updating BleepAction ' + JSON.stringify(bleepAction));
 
     bleepAction.save(function(err) {
       if (err) return res.send(400);

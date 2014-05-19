@@ -4,7 +4,6 @@ angular.module('interDromeApp')
   .controller('BleepCtrl', function ($scope, Bleep, $modal, $log, idSocket, Beacon, Notification, $filter, HueLight, Wemo, BleepAction) {
 
   	$scope.bleepData = Bleep.get();
-  	$scope.selectedBleepRef;
   	$scope.selectedBleep;
   	$scope.selectedBeacon;
     $scope.notificationData = Notification.get(setupNotifications);
@@ -44,8 +43,6 @@ angular.module('interDromeApp')
 
   	$scope.editBleep = function(bleep) {
   		$scope.selectedBleep = bleep;
-  		$scope.selectedBleepRef = JSON.parse(JSON.stringify(bleep));
-
       Bleep.get({id: $scope.selectedBleep._id}, setupBleepActions);
   	}
 
@@ -127,18 +124,18 @@ angular.module('interDromeApp')
 
         var actions = bleepData.bleep.actions;
 
-        for (var i=0; i<bleepActionData.data.length; i++) {
-          var bleepAction = bleepActionData.data[i];
+        for (var i=0; i<actions.length; i++) {
+          var bleepAction = actions[i];
 
           $scope.inserted = {
-            id: $scope.bleepActions.length+1,
-            bleep_id: $scope.selectedBleep._id,
+            _id: bleepAction._id,
+            bleep: $scope.selectedBleep._id,
             event_type: bleepAction.event_type,
-            action_type: bleepAction.event_type,
+            action_type: bleepAction.action_type,
             notification: bleepAction.pushover_user || bleepAction.email,
             control_type: bleepAction.control_type,
-            hue_light: bleepAction.event_type,
-            wemo_device: bleepAction.wemo_device
+            hue_light: bleepAction.hue_light? bleepAction.hue_light._id : undefined,
+            wemo_device: bleepAction.wemo_device ? bleepAction.wemo_device._id : undefined
           };
 
           $scope.bleepActions.push($scope.inserted);
@@ -178,7 +175,7 @@ angular.module('interDromeApp')
       if (typeof hueLightsData !== 'undefined' && typeof hueLightsData.data !== 'undefined') {
         for (var i=0; i<hueLightsData.data.length; i++ ) {
           $scope.hueLights.push(
-            {value: hueLightsData.data[i].light_id, text: hueLightsData.data[i].name}
+            {value: hueLightsData.data[i]._id, text: hueLightsData.data[i].name}
           );
         }
       }
@@ -192,7 +189,7 @@ angular.module('interDromeApp')
       if (typeof wemoData !== 'undefined' && typeof wemoData.devices !== 'undefined') {
         for (var i=0; i<wemoData.devices.length; i++ ) {
           $scope.wemoLights.push(
-            {value: wemoData.devices[i].friendlyName, text: wemoData.devices[i].friendlyName}
+            {value: wemoData.devices[i]._id, text: wemoData.devices[i].friendlyName}
           );
         }
       }
@@ -202,8 +199,7 @@ angular.module('interDromeApp')
       console.log('New Action');
 
       $scope.inserted = {
-        id: $scope.bleepActions.length+1,
-        bleep_id: $scope.selectedBleep._id,
+        bleep: $scope.selectedBleep._id,
         event_type: null,
         action_type: null,
         notification: null,
@@ -241,18 +237,30 @@ angular.module('interDromeApp')
       return selected.length ? selected[0].text : 'Light';
     }
 
+    function setNotification(notification, bleepAction) {
+      if (typeof notification !== 'undefined' && notification) {
+        if (notification.indexOf('@')>0)
+          bleepAction.email = notification;
+        else
+          bleepAction.pushover_user = notification;
+      }
+    }
+
     $scope.saveBleep = function() {
       for (var i=0; i<$scope.bleepActions.length; i++) {
-        console.log($scope.bleepActions[i]);
-
-
+        if (typeof $scope.bleepActions[i]._id !== 'undefined') {
+          setNotification($scope.bleepActions[i].notification, $scope.bleepActions[i]);
+          BleepAction.update({id: $scope.bleepActions[i]._id}, $scope.bleepActions[i]);
+        } else {
+          setNotification($scope.bleepActions[i].notification, $scope.bleepActions[i]);
+          console.log(JSON.stringify($scope.bleepActions[i]));
+          BleepAction.save($scope.bleepActions[i]);
+        }
       }
 
-      Bleep.update({
-        id: $scope.selectedBleep._id, 
-        name: $scope.selectedBleep.name
-      });
-      $scope.selectedBleepRef = JSON.parse(JSON.stringify($scope.selectedBleep));
+      Bleep.update({id:$scope.selectedBleep._id}, {name:$scope.selectedBleep.name});
+
+      $scope.selectedBleep = null;
     }
 });
 
