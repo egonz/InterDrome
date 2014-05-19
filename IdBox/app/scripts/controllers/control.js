@@ -1,7 +1,8 @@
 'use strict';
 
 angular.module('interDromeApp')
-  .controller('ControlCtrl', function ($scope, idSocket, HueBridge, Wemo, $modal, $log) {
+  .controller('ControlCtrl', ['$scope', 'idSocket', 'HueBridge', 'Wemo', '$modal', '$log', 
+    function ($scope, idSocket, HueBridge, Wemo, $modal, $log) {
   	
   	var modalInstance;
 
@@ -135,7 +136,7 @@ angular.module('interDromeApp')
     }, 10000);
   }
 
-});
+}]);
 
 
 // Please note that $modalInstance represents a modal window (instance) dependency.

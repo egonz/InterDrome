@@ -1,7 +1,9 @@
 'use strict';
 
 angular.module('interDromeApp')
-  .controller('BleepCtrl', function ($scope, Bleep, $modal, $log, idSocket, Beacon, Notification, $filter, HueLight, Wemo, BleepAction) {
+  .controller('BleepCtrl', ['$scope', 'Bleep', '$modal', '$log', 'idSocket', 
+    'Beacon', 'Notification', '$filter', 'HueLight', 'Wemo', 'BleepAction',
+    function ($scope, Bleep, $modal, $log, idSocket, Beacon, Notification, $filter, HueLight, Wemo, BleepAction) {
 
   	$scope.bleepData = Bleep.get();
   	$scope.selectedBleep;
@@ -262,7 +264,7 @@ angular.module('interDromeApp')
 
       $scope.selectedBleep = null;
     }
-});
+}]);
 
 
 var BleepBeaconModalInstanceCtrl = function ($scope, $modalInstance, selectedBeacon, Beacon, beaconChange) {
