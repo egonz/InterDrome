@@ -64,7 +64,7 @@
 <div>
     <script type="text/ng-template" id="hue-bridge-modal-register-content">
         <div class="modal-header">
-            <h4>Press the Link Button on the bridge and then click the <span style="color:#428bca;">Register</span> button in this window below.</h4>
+            <h4>Press the Link Button on the bridge and then click the <span style="color:#df691a;">Register</span> button in this window below.</h4>
         </div>
         <div class="modal-body modal-step">
             Step 1: <img src="images/smartbridge.jpg" width="421" height="250" />
@@ -73,7 +73,7 @@
         	<span class="modal-step">Step 2:</span> <button class="btn btn-primary" ng-click="register()" ng-disabled="registerHueBridgeDisabled">
 			 	<i ng-class="{true:'fa fa-spinner fa-spin', false:'glyphicon glyphicon-link'}[registerHueBridgeDisabled]"></i> Register
 			 </button>
-            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+            <button class="btn btn-warning" ng-click="cancel()"><i class="icomoon icon-cancel-circle"></i> Cancel</button>
         </div>
         <div>
 		  	<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
@@ -100,7 +100,7 @@
             </div>
         </div>
         <div class="modal-footer">
-        	<button class="btn btn-warning" ng-click="cancel()">Close</button>
+        	<button class="btn btn-warning" ng-click="cancel()"><span class="icomoon icon-cancel-circle"></span> Close</button>
         </div>
         <div>
 		  	<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>

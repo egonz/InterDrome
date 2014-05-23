@@ -47,7 +47,7 @@ module.exports = function(lcd, socket, bleepActions) {
   }
 
   function allDeviceExit(bleep) {
-    bleepActions.exit(undefined, bleep);
+    bleepActions.exitAction(beacon, bleep, [bleepActions.ACTIONS.TURN_ON, bleepActions.ACTIONS.TURN_OFF]);
   }
 
   function onDeviceExit(id, beacon) {
